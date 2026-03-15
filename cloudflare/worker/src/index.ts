@@ -89,8 +89,8 @@ app.get('/api/admin/products', auth, async (c) => {
 app.post('/api/admin/products', auth, async (c) => {
   const p = await c.req.json()
   const { meta } = await c.env.DB.prepare(
-    'INSERT INTO products (category_id, name, subtitle, price, rating, review_count, image_url, badge, description, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-  ).bind(p.category_id, p.name, p.subtitle, p.price, p.rating || 0, p.review_count || 0, p.image_url, p.badge, p.description, p.is_featured || 0).run()
+    'INSERT INTO products (category_id, name, subtitle, price, rating, review_count, image_url, badge, description, is_featured, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).bind(p.category_id, p.name, p.subtitle, p.price, p.rating || 0, p.review_count || 0, p.image_url, p.badge, p.description, p.is_featured || 0, p.stock || 0).run()
   return c.json({ success: true, id: meta.last_row_id })
 })
 
@@ -98,8 +98,8 @@ app.patch('/api/admin/products/:id', auth, async (c) => {
   const id = c.req.param('id')
   const p = await c.req.json()
   await c.env.DB.prepare(
-    'UPDATE products SET category_id=?, name=?, subtitle=?, price=?, image_url=?, badge=?, description=?, is_featured=? WHERE id=?'
-  ).bind(p.category_id, p.name, p.subtitle, p.price, p.image_url, p.badge, p.description, p.is_featured, id).run()
+    'UPDATE products SET category_id=?, name=?, subtitle=?, price=?, image_url=?, badge=?, description=?, is_featured=?, stock=? WHERE id=?'
+  ).bind(p.category_id, p.name, p.subtitle, p.price, p.image_url, p.badge, p.description, p.is_featured, p.stock, id).run()
   return c.json({ success: true })
 })
 

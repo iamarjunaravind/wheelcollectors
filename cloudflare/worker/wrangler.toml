@@ -8,6 +8,6 @@ JWT_SECRET = "toy-project-secret-123"
 [[d1_databases]]
 binding = "DB"
 database_name = "wheel-collectors-db"
-database_id = "26b03005-c2f6-448b-8ea0-214e1012d4bb"
+database_id = "bb63dc2c-5d49-4d16-8ee7-23b24df5ec2a"
 
 
