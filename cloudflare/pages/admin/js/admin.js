@@ -1,4 +1,6 @@
-const apiBase = 'https://wheel-collectors-api.arjunaravinda.workers.dev/api';
+const apiBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('pages.dev') || window.location.hostname.includes('wheelcollectors.in'))
+    ? 'https://wheel-collectors-api.vipinlal5901.workers.dev/api'
+    : '/api'; // Fallback for local or relative paths
 
 function getAuthHeaders() {
     const token = localStorage.getItem('token');

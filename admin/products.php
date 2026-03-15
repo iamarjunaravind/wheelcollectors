@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_product'])) {
     $rating = $_POST['rating'] ?: 0.0;
     $badge = $_POST['badge'] ?: null;
     $description = $_POST['description'];
+    $stock = $_POST['stock'] ?: 0;
     $is_featured = isset($_POST['is_featured']) ? 1 : 0;
     
     // We'll update the main image_url to the first uploaded image or keep current
@@ -71,14 +72,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_product'])) {
 
         if ($current_id) {
             // Update
-            $stmt = $db->prepare("UPDATE products SET category_id = ?, name = ?, subtitle = ?, price = ?, rating = ?, badge = ?, description = ?, is_featured = ? WHERE id = ?");
-            $stmt->execute([$category_id, $name, $subtitle, $price, $rating, $badge, $description, $is_featured, $current_id]);
+            $stmt = $db->prepare("UPDATE products SET category_id = ?, name = ?, subtitle = ?, price = ?, rating = ?, badge = ?, description = ?, stock = ?, is_featured = ? WHERE id = ?");
+            $stmt->execute([$category_id, $name, $subtitle, $price, $rating, $badge, $description, $stock, $is_featured, $current_id]);
             $product_id = $current_id;
             $message = ["success", "Product updated successfully!"];
         } else {
             // Add
-            $stmt = $db->prepare("INSERT INTO products (category_id, name, subtitle, price, rating, badge, description, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$category_id, $name, $subtitle, $price, $rating, $badge, $description, $is_featured]);
+            $stmt = $db->prepare("INSERT INTO products (category_id, name, subtitle, price, rating, badge, description, stock, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$category_id, $name, $subtitle, $price, $rating, $badge, $description, $stock, $is_featured]);
             $product_id = $db->lastInsertId();
             $message = ["success", "Product added successfully!"];
         }
@@ -224,6 +225,11 @@ include 'header.php';
                 <input type="text" name="badge" value="<?= $edit_prod ? htmlspecialchars($edit_prod['badge']) : '' ?>" style="padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--premium-border); border-radius: 10px; color: white; outline: none;">
             </div>
 
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label style="font-size: 0.8rem; font-weight: 600; color: var(--premium-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Stock Quantity</label>
+                <input type="number" name="stock" value="<?= $edit_prod ? htmlspecialchars($edit_prod['stock']) : '50' ?>" required style="padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--premium-border); border-radius: 10px; color: white; outline: none;">
+            </div>
+
             <div style="display: flex; flex-direction: column; gap: 10px; grid-column: 1 / -1;">
                 <label style="font-size: 0.8rem; font-weight: 600; color: var(--premium-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Product Images (Max 10)</label>
                 
@@ -333,6 +339,7 @@ include 'header.php';
                     <th>Product</th>
                     <th>Category</th>
                     <th>Price</th>
+                    <th>Stock</th>
                     <th>Badges</th>
                     <th style="text-align: right;">Actions</th>
                 </tr>
@@ -358,6 +365,14 @@ include 'header.php';
                         <?php endif; ?>
                     </td>
                     <td style="font-weight: 700; color: white; font-size: 1rem;">₹<?= number_format($prod['price']) ?></td>
+                    <td>
+                        <div style="font-weight: 600; color: <?= $prod['stock'] < 10 ? '#fb7185' : '#34d399' ?>;">
+                            <?= $prod['stock'] ?> Units
+                            <?php if ($prod['stock'] < 10): ?>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; color: #fb7185; opacity: 0.8;">Low Stock</div>
+                            <?php endif; ?>
+                        </div>
+                    </td>
                     <td>
                         <div style="display: flex; flex-wrap: wrap; gap: 5px;">
                             <?php if ($prod['is_featured']): ?>

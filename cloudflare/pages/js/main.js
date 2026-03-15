@@ -1,8 +1,8 @@
 // Wheel Collectors Main JS
 
-const apiBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('pages.dev'))
-    ? `https://wheel-collectors-api.${window.location.hostname.split('.')[window.location.hostname.split('.').length - 3]}.workers.dev/api`
-    : 'https://wheel-collectors-api.vipinlal5901.workers.dev/api';
+const apiBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('pages.dev') || window.location.hostname.includes('wheelcollectors.in'))
+    ? 'https://wheel-collectors-api.vipinlal5901.workers.dev/api'
+    : '/api';
 
 // Sync Cart with LocalStorage
 function getCart() {

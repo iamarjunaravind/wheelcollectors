@@ -18,6 +18,13 @@ if (!empty($cart)) {
     <div class="container">
         <h2 class="section-title">Shopping Cart</h2>
         
+        <?php if (isset($_SESSION['error'])): ?>
+            <div style="background: rgba(244, 63, 94, 0.1); color: #fb7185; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(244, 63, 94, 0.2); display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <?= $_SESSION['error']; unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
+        
         <?php if (empty($cart)): ?>
             <div class="feature-card" style="padding: 60px; text-align: center;">
                 <i class="fa-solid fa-cart-shopping" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>

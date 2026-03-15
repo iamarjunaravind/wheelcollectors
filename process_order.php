@@ -12,32 +12,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
     try {
         $db->beginTransaction();
 
-        // 1. Create Order
+        // 1. Check Stock and Prepare Data
+        foreach ($cart as $product_id => $qty) {
+            $stmt = $db->prepare("SELECT name, stock, price FROM products WHERE id = ?");
+            $stmt->execute([$product_id]);
+            $product = $stmt->fetch();
+            
+            if (!$product) {
+                throw new Exception("Product ID $product_id not found.");
+            }
+            
+            if ($product['stock'] < $qty) {
+                // Not enough stock
+                $_SESSION['error'] = "Not enough stock for " . $product['name'] . ". Available: " . $product['stock'];
+                $db->rollBack();
+                header("Location: cart.php");
+                exit;
+            }
+        }
+
+        // 2. Create Order
         $stmt = $db->prepare("INSERT INTO orders (user_id, total_price, address) VALUES (?, ?, ?)");
         $stmt->execute([$user_id, $total_price, $address]);
         $order_id = $db->lastInsertId();
 
-        // 2. Create Order Items
-        $stmt = $db->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
+        // 3. Create Order Items & Reduce Stock
+        $stmt_item = $db->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
+        $stmt_stock = $db->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+        
         foreach ($cart as $product_id => $qty) {
-            // Get current price
+            // Get current price again to be safe
             $p_stmt = $db->prepare("SELECT price FROM products WHERE id = ?");
             $p_stmt->execute([$product_id]);
             $price = $p_stmt->fetchColumn();
             
-            $stmt->execute([$order_id, $product_id, $qty, $price]);
+            // Insert order item
+            $stmt_item->execute([$order_id, $product_id, $qty, $price]);
+            
+            // Deduct stock
+            $stmt_stock->execute([$qty, $product_id]);
         }
 
         $db->commit();
         
-        // 3. Clear Cart
+        // 4. Clear Cart
         unset($_SESSION['cart']);
         
         header("Location: success.php?order_id=" . $order_id);
         exit;
         
     } catch (Exception $e) {
-        $db->rollBack();
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
         die("Transaction failed: " . $e->getMessage());
     }
 } else {
