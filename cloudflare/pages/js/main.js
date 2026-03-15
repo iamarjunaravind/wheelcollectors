@@ -66,8 +66,17 @@ function showToast(message) {
 async function injectFragments() {
     try {
         const headerRes = await fetch('fragments/header.html');
-        const headerHtml = await headerRes.text();
-        document.getElementById('header-container').innerHTML = headerHtml;
+        if (headerRes.ok) {
+            const headerHtml = await headerRes.text();
+            document.getElementById('header-container').innerHTML = headerHtml;
+        }
+
+        const footerRes = await fetch('fragments/footer.html');
+        if (footerRes.ok) {
+            const footerHtml = await footerRes.text();
+            document.getElementById('footer-container').innerHTML = footerHtml;
+        }
+
         updateCartCount();
         checkLoginState();
     } catch (err) { console.error('Error injecting fragments:', err); }
