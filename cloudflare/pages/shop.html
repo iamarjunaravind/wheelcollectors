@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="section">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px;">
+                <h2 class="section-title" id="shop-title" style="margin-bottom: 0;">All RC Cars</h2>
+                <div id="filter-controls" style="display: none;">
+                    <a href="shop.html" class="btn btn-outline" style="padding: 10px 20px; font-size: 0.9rem;"><i class="fa-solid fa-xmark"></i> Clear Filters</a>
+                </div>
+            </div>
+            <div class="products-grid" id="products-grid">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/main.js"></script>
+    <script>
+        async function loadShopData() {
+            const params = new URLSearchParams(window.location.search);
+            const categoryId = params.get('category');
+            const search = params.get('search');
+            
+            if (categoryId || search) {
+                document.getElementById('filter-controls').style.display = 'block';
+            }
+
+            let apiUrl = `${apiBase}/products?`;
+            if (categoryId) apiUrl += `category=${categoryId}&`;
+            if (search) apiUrl += `search=${encodeURIComponent(search)}&`;
+
+            try {
+                // Update Title
+                let title = "All RC Cars";
+                if (search) {
+                    title = `Search results for "${search}"`;
+                } else if (categoryId) {
+                    const catRes = await fetch(`${apiBase}/categories/${categoryId}`);
+                    if (catRes.ok) {
+                        const cat = await catRes.json();
+                        title = `${cat.name} Series`;
+                    }
+                }
+                document.getElementById('shop-title').innerText = title;
+
+                // Load Products
+                const res = await fetch(apiUrl);
+                const products = await res.json();
+                const grid = document.getElementById('products-grid');
+                
+                if (products.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--text-muted);">No products found matching your criteria.</p>';
+                    return;
+                }
+
+                grid.innerHTML = products.map(p => `
+                    <div class="product-card" onclick="window.location.href='product-details.html?id=${p.id}'" style="cursor: pointer;">
+                        <div class="product-image">
+                            ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+                            <img src="${p.image_url}" alt="${p.name}">
+                        </div>
+                        <div class="product-info">
+                            <h3>${p.name} <small>${p.subtitle || ''}</small></h3>
+                            <div class="product-actions">
+                                <div class="price">₹ ${Number(p.price).toLocaleString()}</div>
+                                <button class="btn-cart" onclick="addToCart(event, ${p.id})">
+                                    <i class="fa fa-shopping-cart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading shop data:', err);
+                document.getElementById('products-grid').innerHTML = '<p>Error loading products. Please try again later.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadShopData);
+    </script>
+</body>
+</html>

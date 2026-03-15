@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | WHEEL COLLECTORS | Hot Wheels Collector Shop</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="row" style="display: flex; gap: 30px;">
+                    <div class="col-lg-3" style="width: 25%;">
+                        <div class="hero-sidebar">
+                            <div class="hero-sidebar-title">
+                                <i class="fa fa-bars"></i>
+                                <span>All Categories</span>
+                            </div>
+                            <ul id="hero-category-list">
+                                <!-- Loaded via JS -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-9" style="width: 75%;">
+                        <div class="hero-search" style="display: flex; align-items: center; gap: 30px; margin-bottom: 30px;">
+                            <div class="hero-search-form" style="flex: 1;">
+                                <form action="shop.html" method="GET" style="display: flex; width: 100%;">
+                                    <input type="text" name="search" placeholder="What model do you need?" style="flex: 1; border: 1px solid #ebebeb; padding: 0 20px; font-size: 16px; outline: none; height: 50px;">
+                                    <button type="submit" class="site-btn" style="background: var(--primary); color: white; border: none; padding: 0 30px; font-weight: 700; text-transform: uppercase; cursor: pointer;">SEARCH</button>
+                                </form>
+                            </div>
+                            <div class="hero-search-phone" style="display: flex; align-items: center; gap: 15px;">
+                                <div class="hero-search-phone-icon" style="width: 50px; height: 50px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px;">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div class="hero-search-phone-text">
+                                    <h5 style="font-size: 18px; color: #1c1c1c; font-weight: 700; margin-bottom: 0;">+91 12345 67890</h5>
+                                    <span style="font-size: 12px; color: var(--text-muted);">support 24/7 time</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hero-slider" id="hero-slider">
+                            <!-- Loaded via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="category-showcases">
+            <!-- Loaded via JS -->
+        </div>
+
+        <section class="section featured-products">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 20px; text-align: left;">
+                    <h2 class="section-title">Featured Collections</h2>
+                    <p style="color: var(--text-muted); text-align: left; margin-top: 5px;">Handpicked favorites for the ultimate enthusiast</p>
+                </div>
+                <div class="product-slider-container" id="featured-slider">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/main.js"></script>
+    <script>
+        async function loadHomeData() {
+            const apiBase = '/api'; // Assuming same-domain deployment with Cloudflare Pages Functions or proxy
+            
+            // Load Categories for Sidebar
+            try {
+                const catRes = await fetch(`${apiBase}/categories`);
+                const categories = await catRes.json();
+                const catList = document.getElementById('hero-category-list');
+                catList.innerHTML = categories.slice(0, 11).map(cat => 
+                    `<li><a href="shop.html?category=${cat.id}">${cat.name}</a></li>`
+                ).join('');
+
+                // Load Showcase Categories
+                const showcaseContainer = document.getElementById('category-showcases');
+                for (const cat of categories) {
+                    const prodRes = await fetch(`${apiBase}/products?category=${cat.id}&limit=8`);
+                    const products = await prodRes.json();
+                    if (products.length === 0) continue;
+
+                    showcaseContainer.innerHTML += `
+                        <section class="section category-showcase">
+                            <div class="container">
+                                <div class="section-header" style="display: flex; justify-content: space-between; align-items: baseline;">
+                                    <h2 class="section-title">${cat.name}</h2>
+                                    <a href="shop.html?category=${cat.id}" class="view-all">View All <i class="fa fa-arrow-right"></i></a>
+                                </div>
+                                <div class="products-grid">
+                                    ${products.map(p => createProductCard(p)).join('')}
+                                </div>
+                            </div>
+                        </section>`;
+                }
+            } catch (err) { console.error('Error loading categories:', err); }
+
+            // Load Hero Slider
+            try {
+                const heroRes = await fetch(`${apiBase}/products?featured=1&limit=3`);
+                const heroProducts = await heroRes.json();
+                const slider = document.getElementById('hero-slider');
+                slider.innerHTML = heroProducts.map((p, idx) => `
+                    <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${p.image_url}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                        <div class="hero-banner-text">
+                            <span>FEATURED</span>
+                            <h2>${p.name}</h2>
+                            <p>${p.subtitle}</p>
+                            <a href="product-details.html?id=${p.id}" class="btn btn-primary"><span>VIEW MODEL</span></a>
+                        </div>
+                    </div>
+                `).join('');
+                // Initialize dots if needed
+            } catch (err) { console.error('Error loading hero slider:', err); }
+
+            // Load Featured Collections
+            try {
+                const featRes = await fetch(`${apiBase}/products?featured=1&limit=12`);
+                const featured = await featRes.json();
+                const featSlider = document.getElementById('featured-slider');
+                featSlider.innerHTML = featured.map(p => createProductCard(p, true)).join('');
+            } catch (err) { console.error('Error loading featured products:', err); }
+        }
+
+        function createProductCard(p, isSlider = false) {
+            return `
+                <div class="product-card ${isSlider ? 'slider-card' : ''}" onclick="window.location.href='product-details.html?id=${p.id}'" style="cursor: pointer;">
+                    <div class="product-image">
+                        ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+                        <img src="${p.image_url}" alt="${p.name}">
+                    </div>
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <div class="product-actions">
+                            <div class="price">₹ ${Number(p.price).toLocaleString()}</div>
+                            <button class="btn-cart" onclick="addToCart(event, ${p.id})">
+                                <i class="fa fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadHomeData);
+    </script>
+</body>
+</html>

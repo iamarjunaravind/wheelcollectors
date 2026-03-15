@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="section">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-grid">
+                <div class="feature-card" style="text-align: left;">
+                    <h3>Contact Information</h3>
+                    <div class="contact-info-item">
+                        <i class="fa-solid fa-location-dot"></i> <span>Kochi, Kerala, India</span>
+                    </div>
+                    <div class="contact-info-item">
+                        <i class="fa-solid fa-phone"></i> <span>+91 98765 43210</span>
+                    </div>
+                    <div class="contact-info-item">
+                        <i class="fa-solid fa-envelope"></i> <span>vault@wheelcollectors.in</span>
+                    </div>
+                    <div class="social-links" style="margin-top: 30px;">
+                        <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <div id="contact-success" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #10b981; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <i class="fa-solid fa-check-circle"></i> Message sent successfully! We'll get back to you soon.
+                    </div>
+                    <form id="contact-form" class="contact-form">
+                        <input type="text" id="contact-name" required placeholder="Your Name" class="form-input">
+                        <input type="email" id="contact-email" required placeholder="Your Email" class="form-input">
+                        <textarea id="contact-message" required placeholder="Your Message" rows="5" class="form-input"></textarea>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // In a real cloudflare migration, this would POST to a Worker
+            // For now, we simulate success
+            document.getElementById('contact-form').style.display = 'none';
+            document.getElementById('contact-success').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

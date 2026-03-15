@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="section">
+        <div class="container" style="max-width: 500px; margin: 0 auto;">
+            <h2 class="section-title">Welcome Back</h2>
+            <div class="feature-card" style="padding: 40px;">
+                <div id="login-error" style="display: none; color: #ef4444; margin-bottom: 20px; padding: 10px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444;">
+                </div>
+
+                <form id="login-form" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 0.9rem; font-weight: 600; color: var(--text-dark);">Email Address</label>
+                        <input type="email" name="email" id="email" required style="background: #f5f5f5; border: 1px solid #ddd; padding: 12px; border-radius: 6px; color: #333; font-family: inherit;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 0.9rem; font-weight: 600; color: var(--text-dark);">Password</label>
+                        <input type="password" name="password" id="password" required style="background: #f5f5f5; border: 1px solid #ddd; padding: 12px; border-radius: 6px; color: #333; font-family: inherit;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="login-btn" style="padding: 15px; margin-top: 10px;">Login</button>
+                </form>
+                <p style="text-align: center; margin-top: 25px; font-size: 0.9rem; color: var(--text-muted);">
+                    Don't have an account? <a href="register.html" style="color: var(--primary); font-weight: 600;">Create Account</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/main.js"></script>
+    <script>
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const errorEl = document.getElementById('login-error');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginBtn.disabled = true;
+            loginBtn.innerText = 'AUTHENTICATING...';
+            errorEl.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch(`${apiBase}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    const params = new URLSearchParams(window.location.search);
+                    const redirect = params.get('redirect') || (data.user.role === 'admin' ? 'admin/index.html' : 'index.html');
+                    window.location.href = redirect;
+                } else {
+                    errorEl.innerText = data.error || 'Invalid email or password.';
+                    errorEl.style.display = 'block';
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = 'Login';
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                errorEl.innerText = 'Something went wrong. Please try again.';
+                errorEl.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.innerText = 'Login';
+            }
+        });
+    </script>
+</body>
+</html>
