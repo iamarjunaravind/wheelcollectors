@@ -92,8 +92,7 @@
                 for (const cat of categories) {
                     const prodRes = await fetch(`${apiBase}/products?category=${cat.id}&limit=8`);
                     const products = await prodRes.json();
-                    if (products.length === 0) continue;
-
+                    
                     showcaseContainer.innerHTML += `
                         <div class="container" style="margin-top: 60px;">
                             <a href="shop.html?category=${cat.id}" class="category-banner-card">
@@ -105,6 +104,7 @@
                                 </div>
                             </a>
                         </div>
+                        ${products.length > 0 ? `
                         <section class="section category-showcase" style="padding-top: 40px !important;">
                             <div class="container">
                                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: baseline;">
@@ -115,7 +115,11 @@
                                     ${products.map(p => createProductCard(p)).join('')}
                                 </div>
                             </div>
-                        </section>`;
+                        </section>` : `
+                        <div class="container" style="padding: 40px 0; text-align: center; color: var(--text-muted); font-style: italic;">
+                            More ${cat.name} models arriving soon. Stay tuned!
+                        </div>`}
+                    `;
                 }
             } catch (err) { console.error('Error loading categories:', err); }
 
