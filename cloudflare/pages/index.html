@@ -41,7 +41,7 @@
                                     <i class="fa-solid fa-phone"></i>
                                 </div>
                                 <div class="hero-search-phone-text">
-                                    <h5 style="font-size: 18px; color: #1c1c1c; font-weight: 700; margin-bottom: 0;">+91 12345 67890</h5>
+                                    <h5 style="font-size: 18px; color: #1c1c1c; font-weight: 700; margin-bottom: 0;">+91 94460 30000</h5>
                                     <span style="font-size: 12px; color: var(--text-muted);">support 24/7 time</span>
                                 </div>
                             </div>
@@ -95,11 +95,21 @@
                     if (products.length === 0) continue;
 
                     showcaseContainer.innerHTML += `
-                        <section class="section category-showcase">
+                        <div class="container" style="margin-top: 60px;">
+                            <a href="shop.html?category=${cat.id}" class="category-banner-card">
+                                <img src="${cat.image_url || 'assets/images/placeholder.png'}" alt="${cat.name}">
+                                <div class="category-banner-overlay">
+                                    <p style="text-transform: uppercase; letter-spacing: 3px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">Premium Collection</p>
+                                    <h2>${cat.name}</h2>
+                                    <p>Discover the finest precision models in the ${cat.name} series.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <section class="section category-showcase" style="padding-top: 40px !important;">
                             <div class="container">
                                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: baseline;">
-                                    <h2 class="section-title">${cat.name}</h2>
-                                    <a href="shop.html?category=${cat.id}" class="view-all">View All <i class="fa fa-arrow-right"></i></a>
+                                    <h2 class="section-title">${cat.name} Highlights</h2>
+                                    <a href="shop.html?category=${cat.id}" class="view-all">View Full Series <i class="fa fa-arrow-right"></i></a>
                                 </div>
                                 <div class="products-grid">
                                     ${products.map(p => createProductCard(p)).join('')}
