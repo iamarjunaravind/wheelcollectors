@@ -2,11 +2,12 @@ name = "wheel-collectors-api"
 main = "src/index.ts"
 compatibility_date = "2024-03-15"
 
+[vars]
+JWT_SECRET = "toy-project-secret-123"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "wheel-collectors-db"
-database_id = "REPLACE_WITH_D1_ID"
+database_id = "26b03005-c2f6-448b-8ea0-214e1012d4bb"
 
-[[r2_buckets]]
-binding = "ASSETS"
-bucket_name = "wheel-collectors-assets"
+

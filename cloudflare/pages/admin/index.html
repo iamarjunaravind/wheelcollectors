@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --premium-bg: #0f172a;
+            --premium-surface: #1e293b;
+            --premium-primary: #6366f1;
+            --premium-text: #f8fafc;
+            --premium-text-muted: #94a3b8;
+            --premium-border: rgba(255, 255, 255, 0.1);
+        }
+        body { background: var(--premium-bg); color: var(--premium-text); min-height: 100vh; display: flex; }
+        .admin-sidebar { width: 280px; background: #1e293b; border-right: 1px solid var(--premium-border); padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .admin-nav a { color: var(--premium-text-muted); text-decoration: none; padding: 14px 18px; border-radius: 12px; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-weight: 500; }
+        .admin-nav a:hover, .admin-nav a.active { color: white; background: rgba(255,255,255,0.05); }
+        .admin-nav a.active { color: var(--premium-primary); border-left: 3px solid var(--premium-primary); border-radius: 0 12px 12px 0; }
+        .admin-main { flex: 1; margin-left: 280px; padding: 40px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .stat-card { background: var(--premium-surface); padding: 25px; border-radius: 20px; border: 1px solid var(--premium-border); display: flex; gap: 20px; align-items: center; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; }
+        .bg-blue { background: #3b82f6; } .bg-green { background: #10b981; } .bg-purple { background: #8b5cf6; } .bg-orange { background: #f59e0b; }
+        .admin-card { background: var(--premium-surface); border-radius: 20px; border: 1px solid var(--premium-border); overflow: hidden; }
+        .admin-card-header { padding: 20px 30px; border-bottom: 1px solid var(--premium-border); display: flex; justify-content: space-between; align-items: center; }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { text-align: left; padding: 15px 30px; background: rgba(0,0,0,0.2); color: var(--premium-text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .admin-table td { padding: 15px 30px; border-bottom: 1px solid var(--premium-border); }
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .badge-pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="admin-main">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <h2 id="admin-welcome">Welcome, Admin</h2>
+            <div id="current-date" style="color: var(--premium-text-muted); font-size: 0.9rem;"></div>
+        </header>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon bg-green"><i class="fas fa-indian-rupee-sign"></i></div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--premium-text-muted);">Revenue</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;" id="stat-revenue">₹ 0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-blue"><i class="fas fa-boxes"></i></div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--premium-text-muted);">Products</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;" id="stat-products">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-purple"><i class="fas fa-users"></i></div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--premium-text-muted);">Users</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;" id="stat-users">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-orange"><i class="fas fa-clock"></i></div>
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--premium-text-muted);">Pending</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;" id="stat-pending">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>Recent Orders</h3>
+                <a href="orders.html" class="btn" style="font-size: 0.8rem; color: var(--premium-primary);">View All</a>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-orders-body">
+                    <tr><td colspan="5" style="text-align: center; padding: 40px;">Loading orders...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+        async function loadStats() {
+            try {
+                // Fetch stats from various endpoints or a combined one
+                // For now, let's just fetch products to show connectivity
+                const prodRes = await fetch(`${apiBase}/admin/products`, { headers: getAuthHeaders() });
+                const products = await prodRes.json();
+                document.getElementById('stat-products').innerText = products.length;
+                
+                // Orders (partial implementation of dashboard)
+                document.getElementById('recent-orders-body').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--premium-text-muted);">No recent orders found.</td></tr>';
+            } catch (err) {
+                console.error('Error loading stats:', err);
+            }
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>

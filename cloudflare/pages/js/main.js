@@ -1,6 +1,6 @@
 // Wheel Collectors Main JS
 
-const apiBase = '/api';
+const apiBase = 'https://wheel-collectors-api.arjunaravinda.workers.dev/api';
 
 // Sync Cart with LocalStorage
 function getCart() {

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --premium-bg: #0f172a;
+            --premium-surface: #1e293b;
+            --premium-primary: #6366f1;
+            --premium-text: #f8fafc;
+            --premium-text-muted: #94a3b8;
+            --premium-border: rgba(255, 255, 255, 0.1);
+        }
+        body { background: var(--premium-bg); color: var(--premium-text); min-height: 100vh; display: flex; }
+        .admin-sidebar { width: 280px; background: #1e293b; border-right: 1px solid var(--premium-border); padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .admin-nav a { color: var(--premium-text-muted); text-decoration: none; padding: 14px 18px; border-radius: 12px; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-weight: 500; }
+        .admin-nav a:hover, .admin-nav a.active { color: white; background: rgba(255,255,255,0.05); }
+        .admin-nav a.active { color: var(--premium-primary); border-left: 3px solid var(--premium-primary); border-radius: 0 12px 12px 0; }
+        .admin-main { flex: 1; margin-left: 280px; padding: 40px; }
+        .admin-card { background: var(--premium-surface); border-radius: 20px; border: 1px solid var(--premium-border); overflow: hidden; margin-bottom: 30px; }
+        .admin-card-header { padding: 20px 30px; border-bottom: 1px solid var(--premium-border); }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { text-align: left; padding: 15px 30px; background: rgba(0,0,0,0.2); color: var(--premium-text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .admin-table td { padding: 15px 30px; border-bottom: 1px solid var(--premium-border); }
+        .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="admin-main">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <h2>Categories</h2>
+        </header>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>Add / Edit Category</h3>
+            </div>
+            <div style="padding: 30px;">
+                <form id="category-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
+                    <input type="hidden" id="cat-id">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 0.8rem; color: var(--premium-text-muted);">Name</label>
+                        <input type="text" id="cat-name" required style="background: rgba(255,255,255,0.05); border: 1px solid var(--premium-border); padding: 10px; border-radius: 8px; color: white;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 0.8rem; color: var(--premium-text-muted);">Slug</label>
+                        <input type="text" id="cat-slug" style="background: rgba(255,255,255,0.05); border: 1px solid var(--premium-border); padding: 10px; border-radius: 8px; color: white;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 0.8rem; color: var(--premium-text-muted);">Image URL</label>
+                        <input type="text" id="cat-image" style="background: rgba(255,255,255,0.05); border: 1px solid var(--premium-border); padding: 10px; border-radius: 8px; color: white;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="height: 42px;">Save Category</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>All Categories</h3>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Slug</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categories-table-body">
+                    <tr><td colspan="4" style="text-align: center; padding: 40px;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${apiBase}/categories`);
+                const categories = await res.json();
+                const tbody = document.getElementById('categories-table-body');
+                tbody.innerHTML = categories.map(c => `
+                    <tr>
+                        <td style="color: var(--premium-text-muted);">#${c.id}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <img src="../${c.image_url || 'assets/images/placeholder.png'}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: white; padding: 2px;">
+                                <span style="font-weight: 600;">${c.name}</span>
+                            </div>
+                        </td>
+                        <td><code style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${c.slug}</code></td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-sm" onclick="editCat(${JSON.stringify(c).replace(/"/g, '&quot;')})" style="color: var(--premium-primary); background: rgba(99,102,241,0.05); font-size: 1rem;"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        function editCat(c) {
+            document.getElementById('cat-id').value = c.id;
+            document.getElementById('cat-name').value = c.name;
+            document.getElementById('cat-slug').value = c.slug;
+            document.getElementById('cat-image').value = c.image_url;
+            window.scrollTo(0,0);
+        }
+
+        document.getElementById('category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('cat-id').value;
+            const data = {
+                name: document.getElementById('cat-name').value,
+                slug: document.getElementById('cat-slug').value,
+                image_url: document.getElementById('cat-image').value
+            };
+            
+            try {
+                const res = await fetch(`${apiBase}/admin/categories`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    document.getElementById('category-form').reset();
+                    document.getElementById('cat-id').value = '';
+                    loadCategories();
+                }
+            } catch (err) { console.error(err); }
+        });
+
+        loadCategories();
+    </script>
+</body>
+</html>

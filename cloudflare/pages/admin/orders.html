@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Orders | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --premium-bg: #0f172a;
+            --premium-surface: #1e293b;
+            --premium-primary: #6366f1;
+            --premium-text: #f8fafc;
+            --premium-text-muted: #94a3b8;
+            --premium-border: rgba(255, 255, 255, 0.1);
+        }
+        body { background: var(--premium-bg); color: var(--premium-text); min-height: 100vh; display: flex; }
+        .admin-sidebar { width: 280px; background: #1e293b; border-right: 1px solid var(--premium-border); padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .admin-nav a { color: var(--premium-text-muted); text-decoration: none; padding: 14px 18px; border-radius: 12px; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-weight: 500; }
+        .admin-nav a:hover, .admin-nav a.active { color: white; background: rgba(255,255,255,0.05); }
+        .admin-nav a.active { color: var(--premium-primary); border-left: 3px solid var(--premium-primary); border-radius: 0 12px 12px 0; }
+        .admin-main { flex: 1; margin-left: 280px; padding: 40px; }
+        .admin-card { background: var(--premium-surface); border-radius: 20px; border: 1px solid var(--premium-border); overflow: hidden; margin-bottom: 30px; }
+        .admin-card-header { padding: 20px 30px; border-bottom: 1px solid var(--premium-border); }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { text-align: left; padding: 15px 30px; background: rgba(0,0,0,0.2); color: var(--premium-text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .admin-table td { padding: 15px 30px; border-bottom: 1px solid var(--premium-border); }
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .badge-pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .badge-completed { background: rgba(16,185,129,0.1); color: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="admin-main">
+        <header style="margin-bottom: 40px;">
+            <h2>Order History</h2>
+        </header>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>Recent Transactions</h3>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User ID</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                    <tr><td colspan="5" style="text-align: center; padding: 40px;">No orders available to fetch from D1 yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        // In the future, we could add /api/admin/orders to the Worker to list all orders
+    </script>
+</body>
+</html>
