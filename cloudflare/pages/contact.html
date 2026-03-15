@@ -17,32 +17,49 @@
         <div class="container">
             <h2 class="section-title">Get In Touch</h2>
             <div class="contact-grid">
-                <div class="feature-card" style="text-align: left;">
-                    <h3>Contact Information</h3>
-                    <div class="contact-info-item">
-                        <i class="fa-solid fa-location-dot"></i> <span>Kochi, Kerala, India</span>
+                <div class="feature-card" style="text-align: left; padding: 40px;">
+                    <h3 style="margin-bottom: 30px;">Contact Information</h3>
+                    <div style="display: flex; flex-direction: column; gap: 25px;">
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <i class="fa-solid fa-location-dot" style="color: var(--primary); margin-top: 5px;"></i>
+                            <div>
+                                <h4 style="font-size: 1rem; margin-bottom: 5px;">Our Garage</h4>
+                                <p style="color: var(--text-muted); font-size: 14px;">Opposite JLN Stadium, Kaloor,<br>Kochi, Kerala 682017, India</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <i class="fa-solid fa-phone" style="color: var(--primary);"></i>
+                            <div>
+                                <h4 style="font-size: 1rem; margin-bottom: 5px;">Call Us</h4>
+                                <p style="color: var(--text-muted); font-size: 14px;">+91 94460 30000</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <i class="fa-solid fa-envelope" style="color: var(--primary);"></i>
+                            <div>
+                                <h4 style="font-size: 1rem; margin-bottom: 5px;">Email Support</h4>
+                                <p style="color: var(--text-muted); font-size: 14px;">vault@wheelcollectors.in</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="contact-info-item">
-                        <i class="fa-solid fa-phone"></i> <span>+91 98765 43210</span>
-                    </div>
-                    <div class="contact-info-item">
-                        <i class="fa-solid fa-envelope"></i> <span>vault@wheelcollectors.in</span>
-                    </div>
-                    <div class="social-links" style="margin-top: 30px;">
-                        <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    
+                    <div class="social-links" style="margin-top: 40px; display: flex; gap: 15px;">
+                        <a href="#" style="width: 45px; height: 45px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; color: white;"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" style="width: 45px; height: 45px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; color: white;"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" style="width: 45px; height: 45px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; color: white;"><i class="fa-brands fa-youtube"></i></a>
                     </div>
                 </div>
-                <div>
+                
+                <div class="feature-card" style="padding: 40px;">
+                    <h3 style="margin-bottom: 30px;">Feedback & Inquiries</h3>
                     <div id="contact-success" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #10b981; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                         <i class="fa-solid fa-check-circle"></i> Message sent successfully! We'll get back to you soon.
                     </div>
-                    <form id="contact-form" class="contact-form">
-                        <input type="text" id="contact-name" required placeholder="Your Name" class="form-input">
-                        <input type="email" id="contact-email" required placeholder="Your Email" class="form-input">
-                        <textarea id="contact-message" required placeholder="Your Message" rows="5" class="form-input"></textarea>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                    <form id="contact-form" class="contact-form" style="display: flex; flex-direction: column; gap: 20px;">
+                        <input type="text" id="contact-name" required placeholder="Your Name" style="width: 100%; border: 1px solid #ddd; padding: 15px; border-radius: 8px; outline: none;">
+                        <input type="email" id="contact-email" required placeholder="Your Email" style="width: 100%; border: 1px solid #ddd; padding: 15px; border-radius: 8px; outline: none;">
+                        <textarea id="contact-message" required placeholder="Your Message" rows="5" style="width: 100%; border: 1px solid #ddd; padding: 15px; border-radius: 8px; outline: none;"></textarea>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">Send Message</button>
                     </form>
                 </div>
             </div>
@@ -55,8 +72,6 @@
     <script>
         document.getElementById('contact-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            // In a real cloudflare migration, this would POST to a Worker
-            // For now, we simulate success
             document.getElementById('contact-form').style.display = 'none';
             document.getElementById('contact-success').style.display = 'block';
         });

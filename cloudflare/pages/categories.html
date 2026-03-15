@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop by Category | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="section">
+        <div class="container">
+            <h2 class="section-title">Shop by Category</h2>
+            <div id="categories-loading" style="text-align: center; padding: 50px;">
+                <i class="fa fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                <p>Curating collections...</p>
+            </div>
+            <div class="category-grid" id="category-grid">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/main.js"></script>
+    <script>
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${apiBase}/categories`);
+                const categories = await res.json();
+                
+                const grid = document.getElementById('category-grid');
+                grid.innerHTML = categories.map(cat => `
+                    <a href="shop.html?category=${cat.id}" class="category-card" style="text-decoration: none; color: inherit; display: block;">
+                        <img src="${cat.image_url || 'assets/images/placeholder.png'}" alt="${cat.name}">
+                        <div class="category-overlay">
+                            <h3>${cat.name}</h3>
+                            <span class="btn-small">Explore</span>
+                        </div>
+                    </a>
+                `).join('');
+                
+                document.getElementById('categories-loading').style.display = 'none';
+            } catch (err) {
+                console.error('Error loading categories:', err);
+                document.getElementById('categories-loading').innerHTML = '<p>Error loading categories. Please refresh.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCategories);
+    </script>
+</body>
+</html>

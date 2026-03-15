@@ -75,7 +75,7 @@
             regBtn.innerText = 'CREATING ACCOUNT...';
 
             try {
-                const res = await fetch(`${apiBase}/api/auth/register`, {
+                const res = await fetch(`${apiBase}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })
