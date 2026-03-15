@@ -111,7 +111,7 @@ a {
     width: 300px;
     height: 100%;
     background: var(--white);
-    padding: 30px;
+    padding: 0 !important;
     z-index: 999;
     overflow-y: auto;
     transition: all, 0.5s;
@@ -442,7 +442,7 @@ a {
 /* Hero Slider */
 .hero-slider {
     position: relative;
-    height: 430px;
+    height: 300px; /* Reduced to ~70% (300/430) */
     border-radius: 8px;
     overflow: hidden;
 }
@@ -747,7 +747,7 @@ h2.section-title, .section-title {
     position: relative;
     overflow: hidden;
     border-bottom: 1px solid #f1f5f9;
-    padding: 30px;
+    padding: 0 !important;
 }
 
 .product-image img {
@@ -1524,7 +1524,7 @@ h2.section-title, .section-title {
     
     .product-image {
         height: 160px !important;
-        padding: 15px !important;
+        padding: 0 !important;
     }
     
     .product-info h3 {
@@ -1532,7 +1532,7 @@ h2.section-title, .section-title {
     }
     
     .product-image img {
-        padding: 6px !important;
+        padding: 0 !important;
     }
     
     .btn-cart span {
@@ -1893,7 +1893,7 @@ h2.section-title, .section-title {
     
     .product-image {
         height: 160px !important;
-        padding: 15px !important;
+        padding: 0 !important;
     }
     
     .product-info h3 {
@@ -1901,7 +1901,7 @@ h2.section-title, .section-title {
     }
     
     .product-image img {
-        padding: 6px !important;
+        padding: 0 !important;
     }
     
     .btn-cart span {
@@ -2284,7 +2284,7 @@ h2.section-title, .section-title {
     }
     
     .premium-content {
-        padding: 30px;
+        padding: 0 !important;
         text-align: center;
         margin: 0 auto;
     }
@@ -2350,7 +2350,7 @@ h2.section-title, .section-title {
     }
     
     .hero-slide {
-        height: 400px;
+        height: 280px !important; /* Reduced to 70% of 400px */
         background-position: center bottom;
     }
 
@@ -2754,7 +2754,7 @@ h2.section-title, .section-title {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 30px;
+    padding: 0 !important;
     z-index: 2;
 }
 
