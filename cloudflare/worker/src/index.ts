@@ -1,4 +1,5 @@
 import { Hono, Context, Next } from 'hono'
+import { cors } from 'hono/cors'
 import { jwt, sign } from 'hono/jwt'
 
 type Bindings = {
@@ -8,8 +9,12 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+app.use('*', cors())
+
+app.get('/', (c) => c.text('Wheel Collectors API is running!'))
+
 // Auth Middleware (Protected routes)
-const auth = (c: Context, next: Next) => jwt({ secret: c.env.JWT_SECRET })(c, next)
+const auth = (c: Context, next: Next) => jwt({ secret: c.env.JWT_SECRET, alg: 'HS256' })(c, next)
 
 app.post('/api/auth/register', async (c) => {
   const { name, email, password } = await c.req.json()
