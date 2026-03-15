@@ -5,6 +5,8 @@ import { jwt, sign } from 'hono/jwt'
 type Bindings = {
   DB: D1Database
   JWT_SECRET: string
+  RAZORPAY_KEY_ID: string
+  RAZORPAY_KEY_SECRET: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -173,6 +175,70 @@ app.get('/api/products/:id', async (c) => {
   const { results: images } = await c.env.DB.prepare('SELECT * FROM product_images WHERE product_id = ? ORDER BY is_primary DESC').bind(id).all()
   
   return c.json({ ...product, images })
+})
+
+// Razorpay: Create Order
+app.post('/api/payments/create-order', async (c) => {
+  const { amount, orderId } = await c.req.json()
+  
+  if (!amount || !orderId) return c.json({ error: 'Missing parameters' }, 400)
+
+  const auth = btoa(`${c.env.RAZORPAY_KEY_ID}:${c.env.RAZORPAY_KEY_SECRET}`)
+  
+  try {
+    const res = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${auth}`
+      },
+      body: JSON.stringify({
+        amount: amount * 100, // INR to Paise
+        currency: 'INR',
+        receipt: `order_rcpt_${orderId}`
+      })
+    })
+
+    const data: any = await res.json()
+    if (data.error) throw new Error(data.error.description)
+    
+    return c.json(data)
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
+})
+
+// Razorpay: Verify Payment
+app.post('/api/payments/verify', async (c) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, internal_order_id } = await c.req.json()
+
+  const secret = c.env.RAZORPAY_KEY_SECRET
+  const payload = razorpay_order_id + '|' + razorpay_payment_id
+  
+  // HMAC SHA256 Verification using Web Crypto
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', 
+    encoder.encode(secret), 
+    { name: 'HMAC', hash: 'SHA-256' }, 
+    false, 
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
+  const expectedSignature = Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+
+  if (expectedSignature === razorpay_signature) {
+    // Update Order Status in D1
+    await c.env.DB.prepare(
+      'UPDATE orders SET status = ?, address = address || ? WHERE id = ?'
+    ).bind('Paid', ` | Payment ID: ${razorpay_payment_id}`, internal_order_id).run()
+    
+    return c.json({ success: true })
+  }
+
+  return c.json({ error: 'Invalid signature' }, 400)
 })
 
 export default app

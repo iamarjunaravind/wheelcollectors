@@ -49,8 +49,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const orderId = params.get('order_id') || '???';
-            document.getElementById('order-id-display').innerText = `Order ID: #TW-${orderId.padStart(6, '0')}`;
+            const orderId = params.get('orderId') || '???';
+            document.getElementById('order-id-display').innerText = `Order ID: #WC-${orderId.toString().padStart(6, '0')}`;
             // Clear cart on success
             localStorage.removeItem('cart');
             updateCartCount();

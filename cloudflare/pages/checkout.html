@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="section">
+        <div class="container">
+            <h2 class="section-title">Checkout</h2>
+            
+            <div id="checkout-container" class="cart-grid">
+                <!-- Shipping Form -->
+                <div class="checkout-form">
+                    <div class="feature-card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 25px; font-size: 1.2rem;">Shipping Details</h3>
+                        <form id="shipping-form">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted);">Full Name</label>
+                                    <input type="text" id="cust-name" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                                </div>
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted);">Phone Number</label>
+                                    <input type="tel" id="cust-phone" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted);">Email Address</label>
+                                <input type="email" id="cust-email" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted);">Complete Address</label>
+                                <textarea id="cust-address" required rows="4" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;"></textarea>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted);">City</label>
+                                    <input type="text" id="cust-city" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                                </div>
+                                <div class="form-group">
+                                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted);">Pincode</label>
+                                    <input type="text" id="cust-pin" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <div class="feature-card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 25px; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">Order Summary</h3>
+                        <div id="checkout-items-list" style="margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Items via JS -->
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="color: var(--text-muted);">Subtotal</span>
+                            <span id="summary-subtotal">₹ 0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <span style="color: var(--text-muted);">Shipping</span>
+                            <span style="color: #10b981;">FREE</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.4rem; margin-bottom: 30px;">
+                            <span>Total</span>
+                            <span style="color: var(--primary);" id="summary-total">₹ 0</span>
+                        </div>
+                        
+                        <button id="pay-button" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 1.1rem; letter-spacing: 1px;">
+                            PLACE ORDER & PAY
+                        </button>
+                        
+                        <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 15px;">
+                            <i class="fa-solid fa-shield-halved"></i> Secure Payment by Razorpay
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let orderTotal = 0;
+        let cartItems = [];
+
+        async function initCheckout() {
+            const cart = getCart();
+            const ids = Object.keys(cart);
+            
+            if (ids.length === 0) {
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${apiBase}/products?ids=${ids.join(',')}`);
+                const products = await res.json();
+                
+                const list = document.getElementById('checkout-items-list');
+                let total = 0;
+                cartItems = [];
+
+                list.innerHTML = products.map(p => {
+                    const qty = cart[p.id];
+                    const subtotal = p.price * qty;
+                    total += subtotal;
+                    
+                    cartItems.push({ productId: p.id, quantity: qty, price: p.price });
+
+                    return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <div style="width: 40px; height: 40px; background: #222; border-radius: 4px; overflow: hidden;">
+                                    <img src="${p.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <span>${p.name} <span style="color: var(--text-muted); font-size: 12px;">x ${qty}</span></span>
+                            </div>
+                            <span>₹${subtotal.toLocaleString()}</span>
+                        </div>`;
+                }).join('');
+
+                orderTotal = total;
+                document.getElementById('summary-subtotal').innerText = `₹ ${total.toLocaleString()}`;
+                document.getElementById('summary-total').innerText = `₹ ${total.toLocaleString()}`;
+                
+            } catch (err) {
+                console.error('Error loading checkout:', err);
+            }
+        }
+
+        document.getElementById('pay-button').addEventListener('click', async () => {
+            const form = document.getElementById('shipping-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const btn = document.getElementById('pay-button');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+
+            const custName = document.getElementById('cust-name').value;
+            const custEmail = document.getElementById('cust-email').value;
+            const custPhone = document.getElementById('cust-phone').value;
+            const fullAddress = `${document.getElementById('cust-address').value}, ${document.getElementById('cust-city').value} - ${document.getElementById('cust-pin').value} | Phone: ${custPhone}`;
+
+            try {
+                // 1. Create order in our D1 database first
+                const orderRes = await fetch(`${apiBase}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: cartItems,
+                        address: fullAddress,
+                        userId: null // Guest checkout for now
+                    })
+                });
+                const orderResult = await orderRes.json();
+                if (!orderResult.success) throw new Error('Order creation failed');
+
+                const internalOrderId = orderResult.orderId;
+
+                // 2. Create Razorpay order via our backend
+                const rzRes = await fetch(`${apiBase}/payments/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: orderTotal,
+                        orderId: internalOrderId
+                    })
+                });
+                const rzData = await rzRes.json();
+                if (rzData.error) throw new Error(rzData.error);
+
+                // 3. Open Razorpay Checkout
+                const options = {
+                    "key": "rzp_test_YOUR_KEY_HERE", // We'll advise the user to set this up
+                    "amount": rzData.amount,
+                    "currency": "INR",
+                    "name": "WHEEL COLLECTORS",
+                    "description": "Order #" + internalOrderId,
+                    "order_id": rzData.id,
+                    "handler": async function (response) {
+                        // After successful payment
+                        const verifyRes = await fetch(`${apiBase}/payments/verify`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                internal_order_id: internalOrderId
+                            })
+                        });
+                        const verifyResult = await verifyRes.json();
+                        if (verifyResult.success) {
+                            saveCart({}); // Clear cart
+                            window.location.href = `success.html?orderId=${internalOrderId}`;
+                        } else {
+                            alert("Payment verification failed. Please contact support.");
+                        }
+                    },
+                    "prefill": {
+                        "name": custName,
+                        "email": custEmail,
+                        "contact": custPhone
+                    },
+                    "theme": { "color": "#ff4d4d" }
+                };
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'PLACE ORDER & PAY';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initCheckout);
+    </script>
+</body>
+</html>
