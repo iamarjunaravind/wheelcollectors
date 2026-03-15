@@ -36,12 +36,14 @@
                 const categories = await res.json();
                 
                 const grid = document.getElementById('category-grid');
+                grid.className = 'category-grid-banners'; // Switch to banner layout
                 grid.innerHTML = categories.map(cat => `
-                    <a href="shop.html?category=${cat.id}" class="category-card" style="text-decoration: none; color: inherit; display: block;">
+                    <a href="shop.html?category=${cat.id}" class="category-banner-card">
                         <img src="${cat.image_url || 'assets/images/placeholder.png'}" alt="${cat.name}">
-                        <div class="category-overlay">
-                            <h3>${cat.name}</h3>
-                            <span class="btn-small">Explore</span>
+                        <div class="category-banner-overlay">
+                            <p style="text-transform: uppercase; letter-spacing: 3px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">Collection</p>
+                            <h2>${cat.name}</h2>
+                            <p>Explore the exclusive range of ${cat.name} models.</p>
                         </div>
                     </a>
                 `).join('');

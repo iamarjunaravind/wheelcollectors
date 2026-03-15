@@ -15,6 +15,11 @@
 
     <main class="section">
         <div class="container">
+            <div id="category-banner" class="shop-category-banner">
+                <div class="shop-category-banner-overlay">
+                    <h1 id="banner-title" style="font-size: 3rem; margin: 0;"></h1>
+                </div>
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px;">
                 <h2 class="section-title" id="shop-title" style="margin-bottom: 0;">All RC Cars</h2>
                 <div id="filter-controls" style="display: none;">
@@ -50,11 +55,18 @@
                 let title = "All RC Cars";
                 if (search) {
                     title = `Search results for "${search}"`;
-                } else if (categoryId) {
+                if (categoryId) {
                     const catRes = await fetch(`${apiBase}/categories/${categoryId}`);
                     if (catRes.ok) {
                         const cat = await catRes.json();
                         title = `${cat.name} Series`;
+                        
+                        // Setup Category Banner
+                        const banner = document.getElementById('category-banner');
+                        const bannerTitle = document.getElementById('banner-title');
+                        bannerTitle.innerText = cat.name;
+                        banner.style.backgroundImage = `url('${cat.image_url || 'assets/images/placeholder.png'}')`;
+                        banner.style.display = 'block';
                     }
                 }
                 document.getElementById('shop-title').innerText = title;
