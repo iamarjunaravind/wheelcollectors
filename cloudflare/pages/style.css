@@ -2914,4 +2914,13 @@ h2.section-title, .section-title {
         padding-bottom: 50px;
         margin-top: 29px;
     }
+    .hero-slider {
+        height: 430px !important;
+    }
+    .product-image {
+        padding: 30px !important;
+    }
+    .product-image img {
+        padding: 15px !important;
+    }
 }
