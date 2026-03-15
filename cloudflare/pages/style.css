@@ -442,7 +442,7 @@ a {
 /* Hero Slider */
 .hero-slider {
     position: relative;
-    height: 300px; /* Reduced to ~70% (300/430) */
+    height: 430px;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -747,7 +747,7 @@ h2.section-title, .section-title {
     position: relative;
     overflow: hidden;
     border-bottom: 1px solid #f1f5f9;
-    padding: 0 !important;
+    padding: 30px;
 }
 
 .product-image img {
