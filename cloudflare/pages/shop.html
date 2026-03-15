@@ -31,7 +31,8 @@
 
     <script src="js/main.js"></script>
     <script>
-        async function loadShopData() {
+        async function loadProducts() {
+            // Using global apiBase from main.js
             const params = new URLSearchParams(window.location.search);
             const categoryId = params.get('category');
             const search = params.get('search');

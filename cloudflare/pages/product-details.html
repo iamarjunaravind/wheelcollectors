@@ -33,7 +33,8 @@
 
     <script src="js/main.js"></script>
     <script>
-        async function loadProductDetails() {
+        async function loadProduct() {
+            // Using global apiBase from main.js
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
             if (!id) { window.location.href = 'shop.html'; return; }
