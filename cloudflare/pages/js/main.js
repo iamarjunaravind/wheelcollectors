@@ -2,7 +2,7 @@
 
 const apiBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('pages.dev'))
     ? `https://wheel-collectors-api.${window.location.hostname.split('.')[window.location.hostname.split('.').length - 3]}.workers.dev/api`
-    : 'https://wheel-collectors-api.arjunaravinda.workers.dev/api';
+    : 'https://wheel-collectors-api.vipinlal5901.workers.dev/api';
 
 // Sync Cart with LocalStorage
 function getCart() {
