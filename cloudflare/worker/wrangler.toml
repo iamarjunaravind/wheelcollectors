@@ -4,6 +4,8 @@ compatibility_date = "2024-03-15"
 
 [vars]
 JWT_SECRET = "toy-project-secret-123"
+RAZORPAY_KEY_ID = "rzp_live_SS08BJzv05lh7z"
+RAZORPAY_KEY_SECRET = "Q6HIoJIAMYa1466eQ7nnmxqX"
 
 [[d1_databases]]
 binding = "DB"

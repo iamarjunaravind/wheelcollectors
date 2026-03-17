@@ -15,8 +15,21 @@ app.use('*', cors())
 
 app.get('/', (c) => c.text('Wheel Collectors API is running!'))
 
-// Auth Middleware (Protected routes)
+// Auth Middleware (Basic JWT)
 const auth = (c: Context, next: Next) => jwt({ secret: c.env.JWT_SECRET, alg: 'HS256' })(c, next)
+
+// Admin Auth Middleware (JWT + Role Check)
+const adminAuth = async (c: Context, next: Next) => {
+  await jwt({ secret: c.env.JWT_SECRET, alg: 'HS256' })(c, async () => {
+    const payload = c.get('jwtPayload') as any
+    if (payload && payload.role === 'admin') {
+      await next()
+    } else {
+      c.status(403)
+      return c.json({ error: 'Unauthorized: Admin access required' })
+    }
+  })
+}
 
 app.post('/api/auth/register', async (c) => {
   const { name, email, password } = await c.req.json()
@@ -39,7 +52,7 @@ app.post('/api/auth/register', async (c) => {
 app.post('/api/auth/login', async (c) => {
   const { email, password } = await c.req.json()
   
-  const user = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first()
+  const user: any = await c.env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first()
   
   // Placeholder: In production use subtle.crypto and bcrypt
   if (user && password === 'admin123') { 
@@ -52,19 +65,37 @@ app.post('/api/auth/login', async (c) => {
 
 // Order API
 app.post('/api/orders', async (c) => {
-  const { items, address, userId } = await c.req.json()
+  const { items, customer_name, customer_email, customer_phone, city, pincode, state, address, userId } = await c.req.json()
   
   if (!items || items.length === 0) return c.json({ error: 'Empty cart' }, 400)
   
-  let totalPrice = 0
+  let subtotal = 0
   for (const item of items) {
-    const p = await c.env.DB.prepare('SELECT price FROM products WHERE id = ?').bind(item.productId).first()
-    if (p) totalPrice += p.price * item.quantity
+    const p: any = await c.env.DB.prepare('SELECT price FROM products WHERE id = ?').bind(item.productId).first()
+    if (p) subtotal += Number(p.price) * item.quantity
   }
 
+  // Shipping Logic
+  let shippingCost = 0
+  if (subtotal < 500) {
+    const kerala = ['Kerala']
+    const middleIndia = ['Tamil Nadu', 'Karnataka', 'Andhra Pradesh', 'Telangana', 'Maharashtra', 'Goa', 'Puducherry', 'Lakshadweep', 'Odisha', 'Gujarat', 'Chhattisgarh']
+    
+    if (kerala.includes(state)) {
+      shippingCost = 50
+    } else if (middleIndia.includes(state)) {
+      shippingCost = 70
+    } else {
+      // North / East / Others
+      shippingCost = 80
+    }
+  }
+
+  const totalPrice = subtotal + shippingCost
+
   const { meta } = await c.env.DB.prepare(
-    'INSERT INTO orders (user_id, total_price, address) VALUES (?, ?, ?)'
-  ).bind(userId || null, totalPrice, address).run()
+    'INSERT INTO orders (user_id, total_price, customer_name, customer_email, customer_phone, city, pincode, state, shipping_cost, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).bind(userId || null, totalPrice, customer_name, customer_email, customer_phone, city, pincode, state, shippingCost, address).run()
   
   const orderId = meta.last_row_id
 
@@ -78,44 +109,153 @@ app.post('/api/orders', async (c) => {
 })
 
 // Categories API
-// --- ADMIN ENDPOINTS (Protected) ---
+// --- ADMIN ENDPOINTS (Protected with adminAuth) ---
+
+// Admin Orders
+app.get('/api/admin/orders', adminAuth, async (c) => {
+  try {
+    const { results: orders } = await c.env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC').all()
+    
+    // Fetch items for each order
+    const ordersWithItems = await Promise.all(orders.map(async (order: any) => {
+      const { results: items } = await c.env.DB.prepare(`
+        SELECT oi.*, p.name as product_name, p.image_url 
+        FROM order_items oi 
+        JOIN products p ON oi.product_id = p.id 
+        WHERE oi.order_id = ?
+      `).bind(order.id).all()
+      return { ...order, items }
+    }))
+
+    return c.json(ordersWithItems)
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
+})
 
 // Products CRUD
-app.get('/api/admin/products', auth, async (c) => {
+app.get('/api/admin/products', adminAuth, async (c) => {
   const { results } = await c.env.DB.prepare('SELECT * FROM products ORDER BY id DESC').all()
   return c.json(results)
 })
 
-app.post('/api/admin/products', auth, async (c) => {
-  const p = await c.req.json()
-  const { meta } = await c.env.DB.prepare(
-    'INSERT INTO products (category_id, name, subtitle, price, rating, review_count, image_url, badge, description, is_featured, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-  ).bind(p.category_id, p.name, p.subtitle, p.price, p.rating || 0, p.review_count || 0, p.image_url, p.badge, p.description, p.is_featured || 0, p.stock || 0).run()
-  return c.json({ success: true, id: meta.last_row_id })
+app.post('/api/admin/products', adminAuth, async (c) => {
+  try {
+    const p = await c.req.json()
+    const { meta } = await c.env.DB.prepare(
+      'INSERT INTO products (category_id, name, subtitle, price, rating, review_count, image_url, badge, description, is_featured, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(p.category_id, p.name, p.subtitle, p.price, p.rating || 0, p.review_count || 0, p.image_url, p.badge, p.description, p.is_featured || 0, p.stock || 0).run()
+    
+    const productId = meta.last_row_id;
+
+    // Handle multiple images
+    if (p.images && Array.isArray(p.images)) {
+      for (const [index, imgPath] of p.images.entries()) {
+        await c.env.DB.prepare(
+          'INSERT INTO product_images (product_id, image_path, is_primary) VALUES (?, ?, ?)'
+        ).bind(productId, imgPath, index === 0 ? 1 : 0).run()
+      }
+    }
+
+    return c.json({ success: true, id: productId })
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
 })
 
-app.patch('/api/admin/products/:id', auth, async (c) => {
-  const id = c.req.param('id')
-  const p = await c.req.json()
-  await c.env.DB.prepare(
-    'UPDATE products SET category_id=?, name=?, subtitle=?, price=?, image_url=?, badge=?, description=?, is_featured=?, stock=? WHERE id=?'
-  ).bind(p.category_id, p.name, p.subtitle, p.price, p.image_url, p.badge, p.description, p.is_featured, p.stock, id).run()
-  return c.json({ success: true })
+app.patch('/api/admin/products/:id', adminAuth, async (c) => {
+  try {
+    const id = c.req.param('id')
+    const p = await c.req.json()
+    
+    await c.env.DB.prepare(
+      'UPDATE products SET category_id=?, name=?, subtitle=?, price=?, image_url=?, badge=?, description=?, is_featured=?, stock=? WHERE id=?'
+    ).bind(p.category_id, p.name, p.subtitle, p.price, p.image_url, p.badge, p.description, p.is_featured, p.stock, id).run()
+
+    // Sync images if provided
+    if (p.images && Array.isArray(p.images)) {
+      // Clear existing
+      await c.env.DB.prepare('DELETE FROM product_images WHERE product_id = ?').bind(id).run()
+      
+      // Add new
+      for (const [index, imgPath] of p.images.entries()) {
+        await c.env.DB.prepare(
+          'INSERT INTO product_images (product_id, image_path, is_primary) VALUES (?, ?, ?)'
+        ).bind(id, imgPath, index === 0 ? 1 : 0).run()
+      }
+    }
+
+    return c.json({ success: true })
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
 })
 
-app.delete('/api/admin/products/:id', auth, async (c) => {
+app.delete('/api/admin/products/:id', adminAuth, async (c) => {
   const id = c.req.param('id')
   await c.env.DB.prepare('DELETE FROM products WHERE id = ?').bind(id).run()
   return c.json({ success: true })
 })
 
 // Categories CRUD
-app.post('/api/admin/categories', auth, async (c) => {
+app.post('/api/admin/categories', adminAuth, async (c) => {
   const { name, slug, image_url } = await c.req.json()
   const { meta } = await c.env.DB.prepare(
     'INSERT INTO categories (name, slug, image_url) VALUES (?, ?, ?)'
   ).bind(name, slug, image_url).run()
   return c.json({ success: true, id: meta.last_row_id })
+})
+
+app.patch('/api/admin/categories/:id', adminAuth, async (c) => {
+  const id = c.req.param('id')
+  const { name, slug, image_url } = await c.req.json()
+  await c.env.DB.prepare(
+    'UPDATE categories SET name = ?, slug = ?, image_url = ? WHERE id = ?'
+  ).bind(name, slug, image_url, id).run()
+  return c.json({ success: true })
+})
+
+app.delete('/api/admin/categories/:id', adminAuth, async (c) => {
+  const id = c.req.param('id')
+  // Check if products exist in this category first
+  const count: any = await c.env.DB.prepare('SELECT COUNT(*) as count FROM products WHERE category_id = ?').bind(id).first('count')
+  if (count && Number(count) > 0) {
+    return c.json({ error: 'Cannot delete category with associated products' }, 400)
+  }
+  await c.env.DB.prepare('DELETE FROM categories WHERE id = ?').bind(id).run()
+  return c.json({ success: true })
+})
+
+// User Management (Admin)
+app.get('/api/admin/users', adminAuth, async (c) => {
+  const { results } = await c.env.DB.prepare('SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC').all()
+  return c.json(results)
+})
+
+app.patch('/api/admin/users/:id', adminAuth, async (c) => {
+  const id = c.req.param('id')
+  const { role } = await c.req.json()
+  
+  // Prevent removing own admin privileges
+  const payload = c.get('jwtPayload') as any
+  if (payload.id == id && role !== 'admin') {
+    return c.json({ error: 'You cannot remove your own admin privileges' }, 400)
+  }
+
+  await c.env.DB.prepare('UPDATE users SET role = ? WHERE id = ?').bind(role, id).run()
+  return c.json({ success: true })
+})
+
+app.delete('/api/admin/users/:id', adminAuth, async (c) => {
+  const id = c.req.param('id')
+  const payload = c.get('jwtPayload') as any
+  
+  if (payload.id == id) {
+    return c.json({ error: 'You cannot delete your own account' }, 400)
+  }
+
+  await c.env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run()
+  return c.json({ success: true })
 })
 
 app.get('/api/categories', async (c) => {
