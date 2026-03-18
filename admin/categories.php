@@ -104,7 +104,10 @@ include 'header.php';
                     <td style="color: var(--premium-text-muted); font-weight: 500;">#<?= $cat['id'] ?></td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <img src="../<?= htmlspecialchars($cat['image_url']) ?>" alt="" style="width: 45px; height: 45px; object-fit: cover; border-radius: 10px; border: 1px solid var(--premium-border); background: var(--premium-bg);">
+                            <?php 
+                            $img_src = $cat['image_url'] ? '../' . htmlspecialchars($cat['image_url']) : '../assets/images/placeholder.png';
+                            ?>
+                            <img src="<?= $img_src ?>" alt="" style="width: 45px; height: 45px; object-fit: contain; border-radius: 10px; border: 1px solid var(--premium-border); background: white; padding: 2px;">
                             <span style="font-weight: 700; color: white; font-size: 1rem;"><?= htmlspecialchars($cat['name']) ?></span>
                         </div>
                     </td>
