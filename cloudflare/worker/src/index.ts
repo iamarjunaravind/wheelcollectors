@@ -1,6 +1,6 @@
 import { Hono, Context, Next } from 'hono'
 import { cors } from 'hono/cors'
-import { jwt, sign } from 'hono/jwt'
+import { jwt, sign, verify } from 'hono/jwt'
 
 type Bindings = {
   DB: D1Database
@@ -19,17 +19,25 @@ app.get('/', (c) => c.text('Wheel Collectors API is running!'))
 const auth = (c: Context, next: Next) => jwt({ secret: c.env.JWT_SECRET, alg: 'HS256' })(c, next)
 
 // Admin Auth Middleware (JWT + Role Check)
+// Admin Auth Middleware (JWT + Role Check)
 const adminAuth = async (c: Context, next: Next) => {
-  await jwt({ secret: c.env.JWT_SECRET, alg: 'HS256' })(c, async () => {
-    const payload = c.get('jwtPayload') as any
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader) {
+    return c.json({ error: 'Unauthorized: No token provided' }, 401);
+  }
+  
+  const token = authHeader.replace('Bearer ', '');
+  try {
+    const payload = await verify(token, c.env.JWT_SECRET, 'HS256');
     if (payload && payload.role === 'admin') {
-      await next()
-    } else {
-      c.status(403)
-      return c.json({ error: 'Unauthorized: Admin access required' })
+      c.set('jwtPayload', payload);
+      return await next();
     }
-  })
-}
+    return c.json({ error: 'Forbidden: Admin access required' }, 403);
+  } catch (err) {
+    return c.json({ error: 'Unauthorized: Invalid or expired token. Please login again.' }, 401);
+  }
+};
 
 app.post('/api/auth/register', async (c) => {
   const { name, email, password } = await c.req.json()

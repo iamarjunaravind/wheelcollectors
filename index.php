@@ -88,10 +88,21 @@
             
             if (empty($products)) continue; // Skip empty categories
         ?>
-        <section class="section category-showcase">
+        <div class="container" style="margin-top: 10px;">
+            <a href="shop.php?category=<?= $cat['id'] ?>" class="category-banner-card">
+                <img src="<?= htmlspecialchars($cat['image_url'] ?: 'assets/images/placeholder.png') ?>" alt="<?= htmlspecialchars($cat['name']) ?>">
+                <div class="category-banner-overlay">
+                    <p style="text-transform: uppercase; letter-spacing: 3px; color: var(--primary); font-weight: 700; margin-bottom: 5px;">Premium Collection</p>
+                    <h2><?= htmlspecialchars($cat['name']) ?></h2>
+                    <p>Discover the finest precision models in the <?= htmlspecialchars($cat['name']) ?> series.</p>
+                </div>
+            </a>
+        </div>
+
+        <section class="section category-showcase" style="padding-top: 40px !important;">
             <div class="container">
                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: baseline;">
-                    <h2 class="section-title"><?= htmlspecialchars($cat['name']) ?></h2>
+                    <h2 class="section-title"><?= htmlspecialchars($cat['name']) ?> Highlights</h2>
                     <a href="shop.php?category=<?= $cat['id'] ?>" class="view-all" style="color: var(--primary); font-weight: 700; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; text-decoration: none;">View All <i class="fa fa-arrow-right" style="font-size: 10px; margin-left: 5px;"></i></a>
                 </div>
                 

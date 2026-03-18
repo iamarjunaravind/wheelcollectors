@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Account | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .account-page { padding: 60px 0; background: #fafafa; min-height: 80vh; }
+        .account-grid { display: grid; grid-template-columns: 280px 1fr; gap: 40px; }
+        
+        .account-sidebar { background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; height: fit-content; }
+        .account-sidebar-user { padding: 30px; text-align: center; border-bottom: 1px solid #f0f0f0; background: linear-gradient(135deg, #0f172a, #1e293b); color: white; }
+        .user-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; border: 4px solid rgba(255,255,255,0.1); }
+        
+        .account-nav { padding: 20px 0; }
+        .account-nav-item { padding: 12px 30px; display: flex; align-items: center; gap: 15px; color: #64748b; text-decoration: none; font-weight: 500; transition: 0.3s; border-left: 3px solid transparent; }
+        .account-nav-item:hover { background: #f8fafc; color: var(--primary); }
+        .account-nav-item.active { background: #f8fafc; color: var(--primary); border-left-color: var(--primary); }
+        
+        .account-content { background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+        .info-card { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+        .info-group { display: flex; flex-direction: column; gap: 8px; }
+        .info-label { font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px; }
+        .info-value { font-size: 1.1rem; color: #1e293b; font-weight: 600; }
+        
+        @media (max-width: 991px) {
+            .account-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <main class="account-page">
+        <div class="container">
+            <div class="account-grid">
+                <!-- Sidebar -->
+                <aside class="account-sidebar">
+                    <div class="account-sidebar-user">
+                        <div class="user-avatar" id="sidebar-avatar">?</div>
+                        <h4 id="sidebar-name" style="margin: 0; font-family: 'Oswald', sans-serif;">User Name</h4>
+                        <p id="sidebar-email" style="font-size: 0.85rem; opacity: 0.7; margin: 5px 0 0;">user@example.com</p>
+                    </div>
+                    <nav class="account-nav">
+                        <a href="javascript:void(0)" class="account-nav-item active"><i class="fa fa-th-large"></i> Account Overview</a>
+                        <a href="javascript:void(0)" class="account-nav-item"><i class="fa fa-shopping-bag"></i> Order History</a>
+                        <a href="javascript:void(0)" class="account-nav-item"><i class="fa fa-map-marker-alt"></i> Address Book</a>
+                        <a href="javascript:void(0)" class="account-nav-item"><i class="fa fa-credit-card"></i> Payment Methods</a>
+                        <a href="javascript:void(0)" class="account-nav-item"><i class="fa fa-cog"></i> Settings</a>
+                        <a href="logout.html" class="account-nav-item" style="margin-top: 20px; color: #ef4444;"><i class="fa fa-sign-out-alt"></i> Logout</a>
+                    </nav>
+                </aside>
+
+                <!-- Content -->
+                <div class="account-content">
+                    <div class="dashboard-header">
+                        <h2 style="margin: 0; font-family: 'Oswald', sans-serif;">Account Dashboard</h2>
+                        <span class="badge" style="background: rgba(99,102,241,0.1); color: var(--primary); padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">Collector ID: <span id="user-id">#000</span></span>
+                    </div>
+
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="font-size: 1.3rem; margin-bottom: 25px; border-left: 4px solid var(--primary); padding-left: 15px;">Personal Information</h3>
+                        <div class="info-card">
+                            <div class="info-group">
+                                <span class="info-label">Full Name</span>
+                                <span class="info-value" id="info-name">---</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Email Address</span>
+                                <span class="info-value" id="info-email">---</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Phone Number</span>
+                                <span class="info-value" id="info-phone">+91 --- --- ----</span>
+                            </div>
+                            <div class="info-group">
+                                <span class="info-label">Member Since</span>
+                                <span class="info-value" id="info-date">---</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 1.3rem; margin-bottom: 25px; border-left: 4px solid var(--primary); padding-left: 15px;">Recent Orders</h3>
+                        <div id="orders-container" style="text-align: center; padding: 40px; background: #fbfbfb; border-radius: 8px; border: 1px dashed #e2e8f0;">
+                            <i class="fa fa-box-open" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 15px; display: block;"></i>
+                            <p style="color: #64748b; margin: 0;">You haven't placed any orders yet.</p>
+                            <a href="shop.html" class="btn btn-sm" style="margin-top: 15px; background: var(--primary); color: white;">Start Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="js/main.js"></script>
+    <script>
+        function loadAccountData() {
+            const userJson = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            if (!token || !userJson) {
+                window.location.href = 'login.html?redirect=account.html';
+                return;
+            }
+
+            const user = JSON.parse(userJson);
+            
+            // Fill sidebar
+            document.getElementById('sidebar-name').innerText = user.name;
+            document.getElementById('sidebar-email').innerText = user.email;
+            document.getElementById('sidebar-avatar').innerText = user.name.charAt(0).toUpperCase();
+
+            // Fill content
+            document.getElementById('info-name').innerText = user.name;
+            document.getElementById('info-email').innerText = user.email;
+            document.getElementById('user-id').innerText = '#' + user.id;
+            
+            if (user.created_at) {
+                const date = new Date(user.created_at);
+                document.getElementById('info-date').innerText = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+            
+            // Try to load orders from API
+            fetch(`${apiBase}/orders`, { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(orders => {
+                    if (orders.length > 0) {
+                        const container = document.getElementById('orders-container');
+                        container.style.textAlign = 'left';
+                        container.innerHTML = orders.map(o => `
+                            <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700;">Order #${o.id}</div>
+                                    <div style="font-size: 0.8rem; color: #666;">${new Date(o.created_at).toLocaleDateString()}</div>
+                                </div>
+                                <div style="font-weight: 700; color: var(--primary);">₹ ${o.total_price.toLocaleString()}</div>
+                                <div class="badge" style="background: ${o.status === 'Paid' ? '#dcfce7' : '#fef9c3'}; color: ${o.status === 'Paid' ? '#166534' : '#854d0e'};">${o.status}</div>
+                            </div>
+                        `).join('');
+                    }
+                }).catch(err => console.error('Error loading orders:', err));
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAccountData);
+    </script>
+</body>
+</html>

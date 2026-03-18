@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Block admin area
+Disallow: /admin/
+Disallow: /admin.html
+
+# Sitemaps
+Sitemap: https://wheelcollectors.in/sitemap.xml

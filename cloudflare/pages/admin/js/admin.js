@@ -1,5 +1,5 @@
 const apiBase = (window.location.hostname.includes('workers.dev') || window.location.hostname.includes('pages.dev') || window.location.hostname.includes('wheelcollectors.in'))
-    ? 'https://wheel-collectors-api.vipinlal5901.workers.dev/api'
+    ? 'https://wheelcollectorsz.vipinlal5901.workers.dev/api'
     : '/api'; // Fallback for local or relative paths
 
 function getAuthHeaders() {
@@ -29,6 +29,57 @@ function adminLogout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '../login.html';
+}
+
+async function handleDeleteRobust(btn, id, type) {
+    if (!btn.classList.contains('confirming')) {
+        btn.classList.add('confirming');
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> CONFIRM?';
+        
+        setTimeout(() => {
+            if (btn.classList.contains('confirming')) {
+                resetDeleteBtn(btn);
+            }
+        }, 3000);
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        const url = type === 'category' ? `${apiBase}/admin/categories/${id}` : `${apiBase}/admin/products/${id}`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        if (res.ok) {
+            if (type === 'category') typeof loadCategories === 'function' && loadCategories();
+            else typeof loadProducts === 'function' && loadProducts();
+        } else {
+            if (res.status === 401) {
+                alert('Session expired. Please login again.');
+                adminLogout();
+                return;
+            }
+            const result = await res.json();
+            alert('Error: ' + (result.error || 'Failed to delete'));
+            resetDeleteBtn(btn);
+        }
+    } catch (err) {
+        console.error('Delete error:', err);
+        alert('Connection error');
+        resetDeleteBtn(btn);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function resetDeleteBtn(btn) {
+    btn.classList.remove('confirming');
+    btn.innerHTML = btn.dataset.originalHtml || '<i class="fas fa-trash"></i>';
 }
 
 async function injectAdminFragments() {

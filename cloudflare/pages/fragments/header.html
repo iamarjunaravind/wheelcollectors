@@ -1,10 +1,38 @@
+<div class="humberger-menu-overlay" onclick="toggleMenu()"></div>
+<div class="humberger-menu-wrapper">
+    <nav class="humberger-menu-nav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+        <div class="header-top-right-auth" id="mobile-auth-links" style="margin-top: 20px; padding: 15px 0; border-top: 1px solid #eee;">
+            <a href="login.html" style="color: var(--text-dark); font-weight: 500;"><i class="fa-solid fa-user"></i> Login</a>
+        </div>
+    </nav>
+    <div id="mobile-menu-wrap"></div>
+    <div class="header-top-right-social">
+        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#"><i class="fa-brands fa-twitter"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+        <a href="#"><i class="fa-brands fa-pinterest-p"></i></a>
+    </div>
+    <div class="humberger-menu-contact">
+        <ul>
+            <li><i class="fa fa-envelope"></i> arjunaravinda@gmail.com</li>
+            <li>Free Shipping for all Collector Orders</li>
+        </ul>
+    </div>
+</div>
+
 <header class="header">
     <div class="header-top">
         <div class="container">
             <div class="row" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f2f2f2; padding: 10px 0;">
                 <div class="header-top-left" style="display: flex; align-items: center; gap: 30px; font-size: 14px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-envelope"></i> vault@wheelcollectors.in
+                        <i class="fa-solid fa-envelope"></i> arjunaravinda@gmail.com
                     </div>
                     <div>Free Shipping for all Collector Orders</div>
                 </div>
@@ -22,7 +50,7 @@
             </div>
         </div>
     </div>
-    <div class="container" style="margin-top: 10px;">
+    <div class="container">
         <div class="row" style="display: flex; justify-content: space-between; align-items: center;">
             <div class="header-logo">
                 <a href="index.html" style="font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -1px; display: flex; align-items: center; color: var(--text-dark);"><span style="color: var(--primary);">WHEEL</span>COLLECTORS</a>
@@ -35,13 +63,16 @@
                     <li><a href="contact.html" style="font-weight: 700; color: var(--text-dark); text-transform: uppercase; font-size: 14px; letter-spacing: 2px;">Contact</a></li>
                 </ul>
             </nav>
-            <div class="header-cart" style="width: 25%; text-align: right; display: flex; justify-content: flex-end; gap: 20px; align-items: center;">
+            <div class="header-cart" style="width: 25%; text-align: right; display: flex; justify-content: flex-end; gap: 5px; align-items: center;">
                 <ul style="display: flex; gap: 20px; list-style: none; margin: 0;">
                     <li><a href="cart.html" style="position: relative; color: var(--text-dark); font-size: 18px;">
                         <i class="fa fa-shopping-bag"></i> 
                         <span id="cart-count" style="position: absolute; top: -10px; right: -10px; width: 18px; height: 18px; background: var(--primary); color: #fff; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center;">0</span>
                     </a></li>
                 </ul>
+                <div class="humberger-open" onclick="toggleMenu()" style="display: none; font-size: 22px; cursor: pointer; color: var(--text-dark); margin-left: 5px;">
+                    <i class="fa fa-bars"></i>
+                </div>
             </div>
         </div>
     </div>

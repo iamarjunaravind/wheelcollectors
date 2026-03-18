@@ -100,16 +100,48 @@
 
         async function loadStats() {
             try {
-                // Fetch stats from various endpoints or a combined one
-                // For now, let's just fetch products to show connectivity
+                // Fetch products
                 const prodRes = await fetch(`${apiBase}/admin/products`, { headers: getAuthHeaders() });
                 const products = await prodRes.json();
                 document.getElementById('stat-products').innerText = products.length;
                 
-                // Orders (partial implementation of dashboard)
-                document.getElementById('recent-orders-body').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--premium-text-muted);">No recent orders found.</td></tr>';
+                // Fetch all orders
+                const orderRes = await fetch(`${apiBase}/admin/orders`, { headers: getAuthHeaders() });
+                const orders = await orderRes.json();
+                
+                // Calculate Revenue
+                const revenue = orders.filter(o => o.status === 'Paid').reduce((sum, o) => sum + o.total_price, 0);
+                document.getElementById('stat-revenue').innerText = `₹ ${revenue.toLocaleString()}`;
+                
+                // Calculate Pending
+                const pendingCount = orders.filter(o => o.status !== 'Paid').length;
+                document.getElementById('stat-pending').innerText = pendingCount;
+
+                // Recent Orders Table (Top 5)
+                const recentOrdersBody = document.getElementById('recent-orders-body');
+                if (!orders || orders.length === 0) {
+                    recentOrdersBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--premium-text-muted);">No recent orders found.</td></tr>';
+                    return;
+                }
+
+                recentOrdersBody.innerHTML = '';
+                orders.slice(0, 5).forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="font-weight: 600;">#${order.id}</td>
+                        <td>${order.customer_name || 'Guest'}</td>
+                        <td style="font-weight: 600; color: var(--premium-primary);">₹ ${order.total_price.toLocaleString()}</td>
+                        <td><span class="badge ${order.status === 'Paid' ? 'badge-completed' : 'badge-pending'}">${order.status || 'Pending'}</span></td>
+                        <td>
+                            <a href="orders.html" style="color: var(--premium-text-muted);"><i class="fas fa-arrow-right"></i></a>
+                        </td>
+                    `;
+                    recentOrdersBody.appendChild(row);
+                });
+
             } catch (err) {
                 console.error('Error loading stats:', err);
+                document.getElementById('recent-orders-body').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #ef4444;">Error building dashboard.</td></tr>';
             }
         }
 

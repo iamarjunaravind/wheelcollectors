@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home | WHEEL COLLECTORS | Hot Wheels Collector Shop</title>
+    <meta name="description" content="WheelCollectors is your premium destination for diecast toy cars and collectible scaled models in India. Explore our exclusive collection of Hot Wheels and more.">
+    <!-- Google Search Console Verification Placeholder -->
+    <!-- <meta name="google-site-verification" content="PASTE_YOUR_CODE_HERE" /> -->
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +32,7 @@
                         </div>
                     </div>
                     <div class="col-lg-9" style="width: 75%;">
-                        <div class="hero-search" style="display: flex; align-items: center; gap: 30px; margin-bottom: 30px;">
+                        <div class="hero-search" style="display: flex; align-items: center; gap: 30px;">
                             <div class="hero-search-form" style="flex: 1;">
                                 <form action="shop.html" method="GET" style="display: flex; width: 100%;">
                                     <input type="text" name="search" placeholder="What model do you need?" style="flex: 1; border: 1px solid #ebebeb; padding: 0 20px; font-size: 16px; outline: none; height: 50px;">
@@ -41,7 +44,7 @@
                                     <i class="fa-solid fa-phone"></i>
                                 </div>
                                 <div class="hero-search-phone-text">
-                                    <h5 style="font-size: 18px; color: #1c1c1c; font-weight: 700; margin-bottom: 0;">+91 94460 30000</h5>
+                                    <h5 style="font-size: 18px; color: #1c1c1c; font-weight: 700; margin-bottom: 0;">+91 77361 28087</h5>
                                     <span style="font-size: 12px; color: var(--text-muted);">support 24/7 time</span>
                                 </div>
                             </div>
@@ -54,6 +57,12 @@
             </div>
         </section>
 
+        <section class="mobile-category-selector">
+            <div class="category-scroll-container" id="mobile-category-list">
+                <!-- Loaded via JS -->
+            </div>
+        </section>
+
         <div id="category-showcases">
             <!-- Loaded via JS -->
         </div>
@@ -62,13 +71,14 @@
             <div class="container">
                 <div class="section-header" style="margin-bottom: 20px; text-align: left;">
                     <h2 class="section-title">Featured Collections</h2>
-                    <p style="color: var(--text-muted); text-align: left; margin-top: 5px;">Handpicked favorites for the ultimate enthusiast</p>
+                    <span style="color: var(--primary); font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Premium Selection</span>
                 </div>
-                <div class="product-slider-container" id="featured-slider">
-                    <!-- Loaded via JS -->
+                <div class="products-grid" id="featured-slider">
+                    <!-- Featured products > 250 loaded here -->
                 </div>
             </div>
         </section>
+
     </main>
 
     <div id="footer-container"></div>
@@ -76,25 +86,126 @@
     <script src="js/main.js"></script>
     <script>
         async function loadHomeData() {
-            // Using global apiBase from main.js
+            console.log('Fetching home data from:', apiBase);
             
-            // Load Categories for Sidebar
+            // 1. Load Hero Slider (Highest Priority)
+            try {
+                const heroRes = await fetch(`${apiBase}/products?limit=50`);
+                const allProducts = await heroRes.json();
+                
+                // Get Premium IDs
+                const premiumProducts = allProducts.filter(p => Number(p.price) > 250).slice(0, 8);
+                
+                if (premiumProducts.length > 0) {
+                    // Fetch full details (with all images) for each premium product in parallel
+                    const detailsPromises = premiumProducts.map(p => fetch(`${apiBase}/products/${p.id}`).then(res => res.json()));
+                    const fullProducts = await Promise.all(detailsPromises);
+                    
+                    // Create slides for ALL images of these products
+                    let slideChoices = [];
+                    fullProducts.forEach(p => {
+                        const productImages = (p.images && p.images.length > 0) 
+                            ? p.images.map(img => img.image_path)
+                            : [p.image_url];
+                        
+                        productImages.forEach(imgUrl => {
+                            slideChoices.push({ img: imgUrl, name: p.name, subtitle: p.subtitle, id: p.id });
+                        });
+                    });
+
+                    // Randomize the slide order
+                    slideChoices.sort(() => Math.random() - 0.5);
+
+                    const slider = document.getElementById('hero-slider');
+                    slider.innerHTML = slideChoices.map((s, idx) => `
+                        <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${s.img}');">
+                            <div class="hero-banner-text">
+                                <span style="background: var(--accent); color: #000; font-weight: 800;">PREMIUM COLLECTION</span>
+                                <h2>${s.name.toUpperCase()}</h2>
+                                <p>${s.subtitle || 'Experience the pinnacle of precision engineering.'}</p>
+                                <a href="product-details.html?id=${s.id}" class="btn btn-primary" style="padding: 15px 40px; font-size: 16px;"><span>EXPLORE MODEL</span></a>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // 1b. Load-Sync Auto-Slide Logic
+                    let currentSlide = 0;
+                    const slides = document.querySelectorAll('.hero-slide');
+                    
+                    if (slides.length > 1) {
+                        const transitionSlide = () => {
+                            const nextSlideIndex = (currentSlide + 1) % slides.length;
+                            const nextSlide = slides[nextSlideIndex];
+                            
+                            // Extract image URL from style
+                            const imgUrl = nextSlide.style.backgroundImage.slice(5, -2);
+                            
+                            // PRELOAD: Only switch once the next image is ready
+                            const img = new Image();
+                            img.src = imgUrl;
+                            img.onload = () => {
+                                slides[currentSlide].classList.remove('active');
+                                currentSlide = nextSlideIndex;
+                                slides[currentSlide].classList.add('active');
+                                setTimeout(transitionSlide, 5000); // Wait 5s then queue next
+                            };
+                            img.onerror = () => {
+                                // If load fails, skip to next immediately
+                                currentSlide = nextSlideIndex;
+                                transitionSlide();
+                            };
+                        };
+                        
+                        // Start the cycle
+                        setTimeout(transitionSlide, 5000);
+                    }
+                } else {
+                    const slider = document.getElementById('hero-slider');
+                    slider.innerHTML = `<div class="hero-slide active" style="background: linear-gradient(135deg, #0f172a, #1e293b);"><div class="hero-banner-text"><h2>THE VAULT</h2><p>Exclusive 1:64 scale machines.</p></div></div>`;
+                }
+            } catch (err) { console.error('Error loading hero slider:', err); }
+
+            // 2. Load Categories (Sidebar + Mobile Selector)
             try {
                 const catRes = await fetch(`${apiBase}/categories`);
-                const categories = await catRes.json();
+                let categories = await catRes.json();
+                
+                // Sidebar order (original)
                 const catList = document.getElementById('hero-category-list');
                 catList.innerHTML = categories.slice(0, 11).map(cat => 
                     `<li><a href="shop.html?category=${cat.id}">${cat.name}</a></li>`
                 ).join('');
 
-                // Load Showcase Categories
+                // Mobile Horizontal Selector
+                const mobileCatList = document.getElementById('mobile-category-list');
+                if (mobileCatList) {
+                    mobileCatList.innerHTML = categories.map(cat => `
+                        <a href="shop.html?category=${cat.id}" class="mobile-cat-item">
+                            <div class="cat-icon-circle">
+                                <img src="${cat.image_url || 'assets/images/placeholder.png'}" alt="${cat.name}">
+                            </div>
+                            <span>${cat.name}</span>
+                        </a>
+                    `).join('');
+                }
+
+                // 3. Reorder for Showcase: Move "HOT WHEELS DIE CAST" to the end
+                const hotWheelsIdx = categories.findIndex(c => c.name.toUpperCase().includes('HOT WHEELS'));
+                if (hotWheelsIdx !== -1) {
+                    const hotWheels = categories.splice(hotWheelsIdx, 1)[0];
+                    categories.push(hotWheels);
+                }
+
+                // 4. Load Showcase Categories
                 const showcaseContainer = document.getElementById('category-showcases');
+                showcaseContainer.innerHTML = ''; // Clear and sequential load
+                
                 for (const cat of categories) {
                     const prodRes = await fetch(`${apiBase}/products?category=${cat.id}&limit=8`);
                     const products = await prodRes.json();
                     
                     showcaseContainer.innerHTML += `
-                        <div class="container" style="margin-top: 60px;">
+                        <div class="container" style="margin-top: 10px;">
                             <a href="shop.html?category=${cat.id}" class="category-banner-card">
                                 <img src="${cat.image_url || 'assets/images/placeholder.png'}" alt="${cat.name}">
                                 <div class="category-banner-overlay">
@@ -123,53 +234,20 @@
                 }
             } catch (err) { console.error('Error loading categories:', err); }
 
-            // Load Hero Slider
+            // 5. Featured Collections Footer (> 250)
             try {
-                const heroRes = await fetch(`${apiBase}/products?featured=1&limit=3`);
-                const heroProducts = await heroRes.json();
-                const slider = document.getElementById('hero-slider');
-                slider.innerHTML = heroProducts.map((p, idx) => `
-                    <div class="hero-slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${p.image_url}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
-                        <div class="hero-banner-text">
-                            <span>FEATURED</span>
-                            <h2>${p.name}</h2>
-                            <p>${p.subtitle}</p>
-                            <a href="product-details.html?id=${p.id}" class="btn btn-primary"><span>VIEW MODEL</span></a>
-                        </div>
-                    </div>
-                `).join('');
-                // Initialize dots if needed
-            } catch (err) { console.error('Error loading hero slider:', err); }
-
-            // Load Featured Collections
-            try {
-                const featRes = await fetch(`${apiBase}/products?featured=1&limit=12`);
-                const featured = await featRes.json();
+                const featRes = await fetch(`${apiBase}/products?limit=100`); // Fetch 100 for better premium coverage
+                const allProds = await featRes.json();
+                const premiumFeatured = allProds.filter(p => Number(p.price) > 250).slice(0, 12);
+                
                 const featSlider = document.getElementById('featured-slider');
-                featSlider.innerHTML = featured.map(p => createProductCard(p, true)).join('');
+                if (featSlider) {
+                    featSlider.innerHTML = premiumFeatured.map(p => createProductCard(p, true)).join('');
+                }
             } catch (err) { console.error('Error loading featured products:', err); }
         }
 
-        function createProductCard(p, isSlider = false) {
-            return `
-                <div class="product-card ${isSlider ? 'slider-card' : ''}" onclick="window.location.href='product-details.html?id=${p.id}'" style="cursor: pointer;">
-                    <div class="product-image">
-                        ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-                        <img src="${p.image_url}" alt="${p.name}">
-                    </div>
-                    <div class="product-info">
-                        <h3>${p.name}</h3>
-                        <div class="product-actions">
-                            <div class="price">₹ ${Number(p.price).toLocaleString()}</div>
-                            <button class="btn-cart" onclick="addToCart(event, ${p.id})">
-                                <i class="fa fa-shopping-cart"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
-        document.addEventListener('DOMContentLoaded', loadHomeData);
+        loadHomeData();
     </script>
 </body>
 </html>

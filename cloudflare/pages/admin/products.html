@@ -29,6 +29,25 @@
         .admin-table td { padding: 15px 30px; border-bottom: 1px solid var(--premium-border); }
         .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
         
+        /* Robust Delete Button Styles */
+        .delete-btn-robust.confirming {
+            background: #ef4444 !important;
+            color: white !important;
+            width: auto !important;
+            min-width: 110px !important;
+            padding: 8px 15px !important;
+            border-radius: 8px !important;
+            font-size: 0.75rem !important;
+            font-weight: 800 !important;
+            white-space: nowrap !important;
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -136,8 +155,19 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="text" id="p-image" placeholder="assets/images/products/example.jpg">
+                    <label>Product Gallery (Max 10)</label>
+                    <div id="gallery-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                        <!-- Thumbnails will appear here -->
+                        <label id="upload-btn" style="aspect-ratio: 1; border: 2px dashed var(--premium-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--premium-text-muted); transition: all 0.3s;">
+                            <i class="fa fa-plus"></i>
+                            <input type="file" id="image-upload" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(this)">
+                        </label>
+                    </div>
+                    <div id="upload-status" style="font-size: 0.8rem; margin-top: 5px; color: #94a3b8; display: none;">
+                        <i class="fa fa-spinner fa-spin"></i> Uploading...
+                    </div>
+                    <!-- Primary Image URL (auto-synced) -->
+                    <input type="hidden" id="p-image">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -167,17 +197,29 @@
         async function loadProducts() {
             try {
                 const res = await fetch(`${apiBase}/admin/products`, { headers: getAuthHeaders() });
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error || `HTTP ${res.status}`);
+                }
                 allProducts = await res.json();
                 renderProducts(allProducts);
             } catch (err) {
                 console.error('Error loading products:', err);
-                document.getElementById('products-table-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--premium-accent);">Error loading products</td></tr>`;
+                document.getElementById('products-table-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--premium-accent); padding: 50px;">
+                    <div style="margin-bottom: 10px;"><i class="fa fa-exclamation-triangle fa-2x"></i></div>
+                    <strong>Error loading inventory:</strong><br>${err.message}
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-sm" onclick="location.reload()" style="background: var(--premium-primary); color: white;">Try Again</button>
+                    </div>
+                </td></tr>`;
             }
         }
 
         function renderProducts(products) {
             const tbody = document.getElementById('products-table-body');
-            tbody.innerHTML = products.map(p => `
+            tbody.innerHTML = products.map(p => {
+                const isOutOfStock = Number(p.stock) === 0;
+                return `
                 <tr>
                     <td style="color: var(--premium-text-muted);">#${p.id}</td>
                     <td>
@@ -191,17 +233,22 @@
                     </td>
                     <td style="font-weight: 700;">₹ ${p.price}</td>
                     <td>
-                        <span style="font-weight: 600; ${p.stock < 10 ? 'color: var(--premium-accent);' : 'color: #34d399;'}">
-                            ${p.stock}
-                        </span>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <span style="font-weight: 600; ${p.stock < 10 ? 'color: var(--premium-accent);' : 'color: #34d399;'}">
+                                ${p.stock} Units
+                            </span>
+                            ${isOutOfStock ? 
+                                `<span style="font-size: 0.65rem; background: rgba(244, 63, 94, 0.1); color: var(--premium-accent); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.2); font-weight: 700;">OUT OF STOCK</span>` 
+                                : ''}
+                        </div>
                     </td>
                     <td><span style="background: rgba(99,102,241,0.1); color: var(--premium-primary); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;">${p.category_id}</span></td>
                     <td style="text-align: right;">
                         <button class="btn btn-sm" onclick="editProduct(${p.id})" style="color: var(--premium-primary); background: rgba(99,102,241,0.05);"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm" onclick="deleteProduct(${p.id})" style="color: var(--premium-accent); background: rgba(244,63,94,0.05);"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm delete-btn-robust" onclick="handleDeleteRobust(this, ${p.id}, 'product')" style="color: var(--premium-accent); background: rgba(244,63,94,0.05);"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         function filterProducts() {
@@ -218,25 +265,138 @@
             document.getElementById('modal-title').innerText = 'Add New Product';
             document.getElementById('product-form').reset();
             document.getElementById('p-id').value = '';
+            galleryImages = [];
+            renderGallery();
             document.getElementById('product-modal').style.display = 'flex';
         }
 
-        function editProduct(id) {
-            const p = allProducts.find(prod => prod.id === id);
-            if (!p) return;
+        let galleryImages = [];
+
+        function renderGallery() {
+            const container = document.getElementById('gallery-container');
+            const uploadBtn = document.getElementById('upload-btn');
             
-            document.getElementById('modal-title').innerText = 'Edit Product';
-            document.getElementById('p-id').value = p.id;
-            document.getElementById('p-name').value = p.name;
-            document.getElementById('p-subtitle').value = p.subtitle || '';
-            document.getElementById('p-price').value = p.price;
-            document.getElementById('p-category').value = p.category_id;
-            document.getElementById('p-stock').value = p.stock || 0;
-            document.getElementById('p-badge').value = p.badge || '';
-            document.getElementById('p-image').value = p.image_url || '';
-            document.getElementById('p-description').value = p.description || '';
+            // Remove existing thumbnails but keep the upload button
+            const thumbnails = container.querySelectorAll('.gallery-item');
+            thumbnails.forEach(t => t.remove());
+
+            galleryImages.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.style.cssText = "position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--premium-border); background: #fff;";
+                
+                const src = img.startsWith('http') ? img : '../' + img;
+                
+                div.innerHTML = `
+                    <img src="${src}" style="width: 100%; height: 100%; object-fit: contain;">
+                    <button type="button" onclick="removeFromGallery(${index})" style="position: absolute; top: 2px; right: 2px; background: rgba(244,63,94,0.9); color: white; border: none; border-radius: 4px; padding: 2px 5px; font-size: 10px; cursor: pointer;">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    ${index === 0 ? '<div style="position: absolute; bottom: 0; left: 0; right: 0; background: var(--premium-primary); color: white; font-size: 8px; text-align: center; font-weight: 800;">PRIMARY</div>' : ''}
+                `;
+                container.insertBefore(div, uploadBtn);
+            });
+
+            // Sync the main image_url hidden field with the first image
+            document.getElementById('p-image').value = galleryImages[0] || '';
             
+            // Hide upload button if 10 images reached
+            uploadBtn.style.display = galleryImages.length >= 10 ? 'none' : 'flex';
+        }
+
+        function removeFromGallery(index) {
+            galleryImages.splice(index, 1);
+            renderGallery();
+        }
+
+        async function handleImageUpload(input) {
+            const files = Array.from(input.files);
+            if (files.length === 0) return;
+
+            if (galleryImages.length + files.length > 10) {
+                alert(`You can only have up to 10 images per product. You already have ${galleryImages.length}.`);
+                input.value = '';
+                return;
+            }
+
+            const status = document.getElementById('upload-status');
+            status.style.display = 'block';
+            
+            let successCount = 0;
+            const total = files.length;
+
+            status.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Preparing ${total} images...`;
+
+            for (let i = 0; i < total; i++) {
+                const file = files[i];
+                status.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Uploading (${i + 1}/${total}): ${file.name}`;
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    // Note: If this key fails with 400, please replace with a fresh ImgBB API Key
+                    const res = await fetch('https://api.imgbb.com/1/upload?key=853712918092e0629b75c3a6e4f40bb3', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await res.json();
+                    if (data.success) {
+                        galleryImages.push(data.data.url);
+                        renderGallery();
+                        successCount++;
+                    } else {
+                        console.error('ImgBB Error:', data.error.message);
+                        if (data.error.message.includes('key')) {
+                            status.innerHTML = `<i class="fa fa-times" style="color: var(--premium-accent);"></i> Invalid API Key. Please update the key in the code.`;
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Upload Fetch Error:', err);
+                }
+            }
+
+            if (successCount === total) {
+                status.innerHTML = '<i class="fa fa-check" style="color: #34d399;"></i> All images uploaded successfully!';
+            } else {
+                status.innerHTML = `<i class="fa fa-exclamation-triangle" style="color: var(--premium-accent);"></i> Uploaded ${successCount}/${total} images.`;
+            }
+            
+            setTimeout(() => { status.style.display = 'none'; }, 3000);
+            input.value = ''; // Reset file input
+        }
+
+        async function editProduct(id) {
+            document.getElementById('modal-title').innerText = 'Loading...';
             document.getElementById('product-modal').style.display = 'flex';
+            
+            try {
+                const res = await fetch(`${apiBase}/products/${id}`);
+                const p = await res.json();
+                
+                document.getElementById('modal-title').innerText = 'Edit Product';
+                document.getElementById('p-id').value = p.id;
+                document.getElementById('p-name').value = p.name;
+                document.getElementById('p-subtitle').value = p.subtitle || '';
+                document.getElementById('p-price').value = p.price;
+                document.getElementById('p-category').value = p.category_id;
+                document.getElementById('p-stock').value = p.stock || 0;
+                document.getElementById('p-badge').value = p.badge || '';
+                document.getElementById('p-description').value = p.description || '';
+                
+                // Load Gallery
+                galleryImages = p.images && p.images.length > 0 
+                    ? p.images.map(img => img.image_path)
+                    : (p.image_url ? [p.image_url] : []);
+                
+                renderGallery();
+            } catch (err) {
+                console.error('Error fetching product:', err);
+                alert('Failed to load product details');
+                hideModal();
+            }
         }
 
         function hideModal() {
@@ -245,6 +405,9 @@
 
         document.getElementById('product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            
             const id = document.getElementById('p-id').value;
             const data = {
                 name: document.getElementById('p-name').value,
@@ -255,39 +418,44 @@
                 badge: document.getElementById('p-badge').value,
                 image_url: document.getElementById('p-image').value,
                 description: document.getElementById('p-description').value,
-                is_featured: 0 // Default
+                is_featured: 0,
+                images: galleryImages
             };
 
             try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Saving...';
+
                 const method = id ? 'PATCH' : 'POST';
                 const url = id ? `${apiBase}/admin/products/${id}` : `${apiBase}/admin/products`;
                 
+                console.log('Sending data:', data, 'to', url);
+
                 const res = await fetch(url, {
                     method,
                     headers: getAuthHeaders(),
                     body: JSON.stringify(data)
                 });
 
+                const result = await res.json();
+                console.log('Response:', result);
+
                 if (res.ok) {
                     hideModal();
                     loadProducts();
                 } else {
-                    const err = await res.json();
-                    alert('Error: ' + err.error);
+                    alert('Error: ' + (result.error || 'Failed to save'));
                 }
-            } catch (err) { console.error('Save error:', err); }
+            } catch (err) { 
+                console.error('Save error:', err);
+                alert('Connection error. Check console.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
         });
 
-        async function deleteProduct(id) {
-            if (!confirm('Are you sure you want to delete this product?')) return;
-            try {
-                const res = await fetch(`${apiBase}/admin/products/${id}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
-                });
-                if (res.ok) loadProducts();
-            } catch (err) { console.error('Delete error:', err); }
-        }
+        // handleDeleteRobust is now global in admin.js
 
         // Initialize
         loadCategories();

@@ -1,4 +1,4 @@
-name = "wheel-collectors-api"
+name = "wheelcollectorsz"
 main = "src/index.ts"
 compatibility_date = "2024-03-15"
 
@@ -9,7 +9,7 @@ RAZORPAY_KEY_SECRET = "Q6HIoJIAMYa1466eQ7nnmxqX"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "wheel-collectors-db"
-database_id = "bb63dc2c-5d49-4d16-8ee7-23b24df5ec2a"
+database_name = "wheelcollectorsz-db"
+database_id = "1d346fde-f7af-491c-aa20-1b45020bf24a"
 
 

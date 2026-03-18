@@ -273,10 +273,13 @@
         .delete-btn-robust.confirming {
             background: #ef4444 !important;
             color: white !important;
-            padding: 6px 15px !important;
-            border-radius: 6px !important;
-            font-size: 0.8rem !important;
-            font-weight: 700 !important;
+            width: auto !important;
+            min-width: 110px !important;
+            padding: 8px 15px !important;
+            border-radius: 8px !important;
+            font-size: 0.75rem !important;
+            font-weight: 800 !important;
+            white-space: nowrap !important;
             animation: pulse-red 1.5s infinite;
         }
         @keyframes pulse-red {

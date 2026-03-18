@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users | WHEEL COLLECTORS</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --premium-bg: #0f172a;
+            --premium-surface: #1e293b;
+            --premium-primary: #6366f1;
+            --premium-text: #f8fafc;
+            --premium-text-muted: #94a3b8;
+            --premium-border: rgba(255, 255, 255, 0.1);
+            --premium-accent: #f43f5e;
+        }
+        body { background: var(--premium-bg); color: var(--premium-text); min-height: 100vh; display: flex; }
+        .admin-sidebar { width: 280px; background: #1e293b; border-right: 1px solid var(--premium-border); padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .admin-nav a { color: var(--premium-text-muted); text-decoration: none; padding: 14px 18px; border-radius: 12px; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-weight: 500; }
+        .admin-nav a:hover, .admin-nav a.active { color: white; background: rgba(255,255,255,0.05); }
+        .admin-nav a.active { color: var(--premium-primary); border-left: 3px solid var(--premium-primary); border-radius: 0 12px 12px 0; }
+        .admin-main { flex: 1; margin-left: 280px; padding: 40px; width: calc(100% - 280px); }
+        .admin-card { background: var(--premium-surface); border-radius: 20px; border: 1px solid var(--premium-border); overflow: hidden; margin-bottom: 30px; }
+        .admin-card-header { padding: 20px 30px; border-bottom: 1px solid var(--premium-border); display: flex; justify-content: space-between; align-items: center; }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { text-align: left; padding: 15px 30px; background: rgba(0,0,0,0.2); color: var(--premium-text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .admin-table td { padding: 15px 30px; border-bottom: 1px solid var(--premium-border); }
+        .btn-sm { padding: 8px; border-radius: 8px; font-size: 1rem; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; transition: 0.3s; }
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid transparent; }
+        
+        .delete-btn-robust.confirming {
+            background: #ef4444 !important;
+            color: white !important;
+            width: auto !important;
+            padding: 0 15px !important;
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-main">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <h2>User Management</h2>
+        </header>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3>System Users</h3>
+                <div id="user-count" style="font-size: 0.8rem; color: var(--premium-text-muted);">0 Users registered</div>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Info</th>
+                        <th>Role</th>
+                        <th>Joined Date</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <tr><td colspan="5" style="text-align: center; padding: 50px;">Loading users...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script>
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${apiBase}/admin/users`, { headers: getAuthHeaders() });
+                const users = await res.json();
+                
+                if (res.status === 403) {
+                    alert('Access Denied: Admin role required');
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                document.getElementById('user-count').innerText = `${users.length} Users registered`;
+                const tbody = document.getElementById('users-table-body');
+                
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 50px; color: var(--premium-text-muted);">No users found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td style="color: var(--premium-text-muted);">#${user.id}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--premium-primary), #4f46e5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem;">
+                                    ${user.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600;">${user.name}</div>
+                                    <div style="font-size: 0.75rem; color: var(--premium-text-muted);">${user.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge" style="background: ${user.role === 'admin' ? 'rgba(99,102,241,0.1)' : 'rgba(148,163,184,0.1)'}; color: ${user.role === 'admin' ? 'var(--premium-primary)' : 'var(--premium-text-muted)'}; border-color: ${user.role === 'admin' ? 'rgba(99,102,241,0.2)' : 'rgba(148,163,184,0.2)'};">
+                                ${user.role.toUpperCase()}
+                            </span>
+                        </td>
+                        <td style="color: var(--premium-text-muted); font-size: 0.85rem;">
+                            ${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                <button class="btn-sm" title="Toggle Role" onclick="toggleRole(${user.id}, '${user.role}')" style="color: var(--premium-primary); background: rgba(99,102,241,0.05);">
+                                    <i class="fas fa-user-shield"></i>
+                                </button>
+                                <button class="btn-sm delete-btn-robust" title="Delete User" onclick="handleDeleteRobust(this, ${user.id})" style="color: var(--premium-accent); background: rgba(244,63,94,0.05);">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading users:', err);
+                document.getElementById('users-table-body').innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--premium-accent); padding: 50px;">Failed to load users.</td></tr>';
+            }
+        }
+
+        async function toggleRole(id, currentRole) {
+            const newRole = currentRole === 'admin' ? 'user' : 'admin';
+            try {
+                const res = await fetch(`${apiBase}/admin/users/${id}`, {
+                    method: 'PATCH',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ role: newRole })
+                });
+                const data = await res.json();
+                if (res.ok) loadUsers();
+                else alert(data.error || 'Failed to update role');
+            } catch (err) { console.error(err); }
+        }
+
+        function handleDeleteRobust(btn, id) {
+            if (!btn.classList.contains('confirming')) {
+                btn.classList.add('confirming');
+                btn.dataset.originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> CONFIRM?';
+                
+                setTimeout(() => {
+                    if (btn.classList.contains('confirming')) {
+                        btn.classList.remove('confirming');
+                        btn.innerHTML = btn.dataset.originalHtml;
+                    }
+                }, 3000);
+            } else {
+                executeDelete(id);
+            }
+        }
+
+        async function executeDelete(id) {
+            try {
+                const res = await fetch(`${apiBase}/admin/users/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (res.ok) loadUsers();
+                else alert(data.error || 'Failed to delete user');
+            } catch (err) { console.error(err); }
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>

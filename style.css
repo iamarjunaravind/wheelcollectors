@@ -183,7 +183,7 @@ a {
 
 .humberger-menu-nav ul li a {
     display: block;
-    padding: 10px 0;
+    padding: 12px 0;
     color: var(--text-dark);
     font-size: 14px;
     font-weight: 700;
@@ -1218,6 +1218,13 @@ h2.section-title, .section-title {
     align-items: start;
 }
 
+@media (max-width: 900px) {
+    .checkout-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
+
 .product-details-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
@@ -1453,7 +1460,7 @@ h2.section-title, .section-title {
     .header-cart {
         gap: 15px !important; /* Gap between search and cart */
         width: auto !important; /* Let content dictate width */
-        margin-right: 20px !important; /* Exact 20px gap to hamburger */
+        margin-right: 0px !important; /* Removed margin-right as requested */
         justify-content: flex-end !important;
     }
     
@@ -1661,7 +1668,7 @@ h2.section-title, .section-title {
     .header-cart {
         gap: 15px !important; /* Gap between search and cart */
         width: auto !important; /* Let content dictate width */
-        margin-right: 20px !important; /* Exact 20px gap to hamburger */
+        margin-right: 0px !important; /* Removed margin-right as requested */
         justify-content: flex-end !important;
     }
     
@@ -2914,4 +2921,24 @@ h2.section-title, .section-title {
         padding-bottom: 50px;
         margin-top: 29px;
     }
+}
+
+/* Premium Inputs for Checkout/Forms */
+.premium-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.premium-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(223, 22, 35, 0.1);
 }

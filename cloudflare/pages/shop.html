@@ -81,23 +81,7 @@
                     return;
                 }
 
-                grid.innerHTML = products.map(p => `
-                    <div class="product-card" onclick="window.location.href='product-details.html?id=${p.id}'" style="cursor: pointer;">
-                        <div class="product-image">
-                            ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-                            <img src="${p.image_url}" alt="${p.name}">
-                        </div>
-                        <div class="product-info">
-                            <h3>${p.name} <small>${p.subtitle || ''}</small></h3>
-                            <div class="product-actions">
-                                <div class="price">₹ ${Number(p.price).toLocaleString()}</div>
-                                <button class="btn-cart" onclick="addToCart(event, ${p.id})">
-                                    <i class="fa fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                grid.innerHTML = products.map(p => createProductCard(p)).join('');
             } catch (err) {
                 console.error('Error loading shop data:', err);
                 document.getElementById('products-grid').innerHTML = '<p>Error loading products. Please try again later.</p>';

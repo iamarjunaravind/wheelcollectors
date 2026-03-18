@@ -26,7 +26,26 @@
         .admin-table { width: 100%; border-collapse: collapse; }
         .admin-table th { text-align: left; padding: 15px 30px; background: rgba(0,0,0,0.2); color: var(--premium-text-muted); font-size: 0.8rem; text-transform: uppercase; }
         .admin-table td { padding: 15px 30px; border-bottom: 1px solid var(--premium-border); }
-        .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; }
+        .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+        
+        /* Robust Delete Button Styles */
+        .delete-btn-robust.confirming {
+            background: #ef4444 !important;
+            color: white !important;
+            width: auto !important;
+            min-width: 110px !important;
+            padding: 8px 15px !important;
+            border-radius: 8px !important;
+            font-size: 0.75rem !important;
+            font-weight: 800 !important;
+            white-space: nowrap !important;
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
     </style>
 </head>
 <body>
@@ -98,6 +117,7 @@
                         <td><code style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${c.slug}</code></td>
                         <td style="text-align: right;">
                             <button class="btn btn-sm" onclick="editCat(${JSON.stringify(c).replace(/"/g, '&quot;')})" style="color: var(--premium-primary); background: rgba(99,102,241,0.05); font-size: 1rem;"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm delete-btn-robust" onclick="handleDeleteRobust(this, ${c.id}, 'category')" style="color: var(--premium-accent); background: rgba(244,63,94,0.05); font-size: 1rem; margin-left: 8px;" title="Delete Category"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('');
@@ -108,12 +128,18 @@
             document.getElementById('cat-id').value = c.id;
             document.getElementById('cat-name').value = c.name;
             document.getElementById('cat-slug').value = c.slug;
-            document.getElementById('cat-image').value = c.image_url;
+            document.getElementById('cat-image').value = c.image_url || '';
+            document.querySelector('#category-form button').innerText = 'Update Category';
             window.scrollTo(0,0);
         }
 
+        // handleDeleteRobust is now global in admin.js
+
         document.getElementById('category-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitBtn = e.target.querySelector('button');
+            const originalText = submitBtn.innerText;
+            
             const id = document.getElementById('cat-id').value;
             const data = {
                 name: document.getElementById('cat-name').value,
@@ -122,17 +148,35 @@
             };
             
             try {
-                const res = await fetch(`${apiBase}/admin/categories`, {
-                    method: 'POST',
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Saving...';
+                
+                const method = id ? 'PATCH' : 'POST';
+                const url = id ? `${apiBase}/admin/categories/${id}` : `${apiBase}/admin/categories`;
+                
+                const res = await fetch(url, {
+                    method,
                     headers: getAuthHeaders(),
                     body: JSON.stringify(data)
                 });
+                
                 if (res.ok) {
                     document.getElementById('category-form').reset();
                     document.getElementById('cat-id').value = '';
+                    submitBtn.innerText = 'Save Category';
                     loadCategories();
+                } else {
+                    const result = await res.json();
+                    alert('Error: ' + (result.error || 'Failed to save'));
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error(err);
+                alert('Connection error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = id ? 'Update Category' : 'Save Category';
+                if (!id) submitBtn.innerText = 'Save Category';
+            }
         });
 
         loadCategories();
